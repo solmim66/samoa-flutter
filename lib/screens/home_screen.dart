@@ -99,14 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text('Sala Danza',
                       style: GoogleFonts.cormorantGaramond(
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w300,
                           color: kPurple,
-                          letterSpacing: 2)),
-                  const SizedBox(width: 10),
+                          letterSpacing: 1)),
+                  const SizedBox(width: 8),
                   Text('& Spettacoli',
                       style: GoogleFonts.montserrat(
-                          fontSize: 10, color: kTextMuted, letterSpacing: 3)),
+                          fontSize: 9, color: kTextMuted, letterSpacing: 2)),
                 ],
               ),
             ),

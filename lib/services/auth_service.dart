@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -18,6 +19,12 @@ class AuthService {
   }
 
   static Future<UserCredential?> signInWithGoogle() async {
+    if (kIsWeb) {
+      // Su web usa direttamente il popup di Firebase Auth (no client ID richiesto)
+      final provider = GoogleAuthProvider();
+      return _auth.signInWithPopup(provider);
+    }
+    // Su mobile usa google_sign_in
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
     final googleAuth = await googleUser.authentication;
@@ -29,7 +36,7 @@ class AuthService {
   }
 
   static Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    if (!kIsWeb) await _googleSignIn.signOut();
     await _auth.signOut();
   }
 

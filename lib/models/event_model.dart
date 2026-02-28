@@ -17,6 +17,7 @@ class EventModel {
   final int totalBooked;
   final List<String> tags;
   final String color;
+  final String imageUrl;
   final DateTime? createdAt;
 
   const EventModel({
@@ -36,6 +37,7 @@ class EventModel {
     required this.totalBooked,
     required this.tags,
     required this.color,
+    this.imageUrl = '',
     this.createdAt,
   });
 
@@ -57,6 +59,7 @@ class EventModel {
       totalBooked: (map['totalBooked'] as num?)?.toInt() ?? 0,
       tags: List<String>.from(map['tags'] as List? ?? []),
       color: map['color'] as String? ?? '#4A1A6B',
+      imageUrl: map['imageUrl'] as String? ?? '',
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
     );
   }
@@ -77,6 +80,7 @@ class EventModel {
     'totalBooked': totalBooked,
     'tags': tags,
     'color': color,
+    'imageUrl': imageUrl,
   };
 
   bool get soldOut => totalBooked >= totalSeats;

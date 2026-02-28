@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ─── Colori ───────────────────────────────────────────────────────────────────
-const Color kBackground   = Color(0xFF0D0A14);
-const Color kCard         = Color(0xFF13101A);
-const Color kCardBorder   = Color(0xFF2E1E3A);
-const Color kPurple       = Color(0xFFA853D4);
-const Color kPurpleDark   = Color(0xFF6B2E9C);
-const Color kGold         = Color(0xFFD4A853);
-const Color kText         = Color(0xFFF5EFE6);
-const Color kTextSecond   = Color(0xFF7A6A76);
-const Color kTextMuted    = Color(0xFF5A4A56);
+const Color kBackground   = Color(0xFFFFFFFF);
+const Color kCard         = Color(0xFFF0F4FA);
+const Color kCardBorder   = Color(0xFFBBD0F0);
+const Color kPurple       = Color(0xFF1565C0);
+const Color kPurpleDark   = Color(0xFF0D47A1);
+const Color kGold         = Color(0xFF1E88E5);
+const Color kText         = Color(0xFF0D2B6B);
+const Color kTextSecond   = Color(0xFF3D5FA0);
+const Color kTextMuted    = Color(0xFF6A8CC0);
 const Color kSuccess      = Color(0xFF4CAF50);
 const Color kWarning      = Color(0xFFFF9800);
 const Color kError        = Color(0xFFF44336);
@@ -52,23 +52,23 @@ TextStyle labelSmall({double fontSize = 11, Color color = kTextSecond, double le
 // ─── ThemeData ────────────────────────────────────────────────────────────────
 ThemeData buildAppTheme() {
   return ThemeData(
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     scaffoldBackgroundColor: kBackground,
-    colorScheme: const ColorScheme.dark(
+    colorScheme: const ColorScheme.light(
       primary: kPurple,
       secondary: kGold,
       surface: kCard,
       error: kError,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xF00D0A14),
+      backgroundColor: Color(0xF0FFFFFF),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
     ),
     dividerColor: kCardBorder,
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF1A1020),
+      fillColor: const Color(0xFFEEF2FC),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: kCardBorder),
@@ -81,7 +81,7 @@ ThemeData buildAppTheme() {
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: kPurple),
       ),
-      hintStyle: GoogleFonts.montserrat(color: const Color(0xFF3D2E4A), fontSize: 13),
+      hintStyle: GoogleFonts.montserrat(color: const Color(0xFF9AA8C0), fontSize: 13),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

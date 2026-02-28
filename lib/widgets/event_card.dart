@@ -63,18 +63,63 @@ class _EventCardState extends State<EventCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header colorato ──────────────────────────────────────────────
+            // ── Header (immagine o gradiente) ─────────────────────────────
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: gradient,
-                ),
+                gradient: event.imageUrl.isEmpty
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: gradient,
+                      )
+                    : null,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               ),
-              padding: const EdgeInsets.all(24),
-              child: Column(
+              child: Stack(
+                children: [
+                  if (event.imageUrl.isNotEmpty)
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
+                      child: Image.network(
+                        event.imageUrl,
+                        width: double.infinity,
+                        height: 160,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, st) => Container(
+                          height: 160,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: gradient,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (event.imageUrl.isNotEmpty)
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.vertical(top: Radius.circular(12)),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Tags
@@ -110,6 +155,9 @@ class _EventCardState extends State<EventCard> {
                   Text('🎵 ${event.dj}  ·  🕘 ${event.time}',
                       style: GoogleFonts.montserrat(
                           fontSize: 12, color: kText.withValues(alpha: 0.7))),
+                ],
+              ),
+                  ),
                 ],
               ),
             ),

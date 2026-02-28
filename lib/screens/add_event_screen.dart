@@ -26,6 +26,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _dinnerSeatsCtrl = TextEditingController(text: '40');
   final _totalSeatsCtrl = TextEditingController(text: '200');
   final _tagsCtrl = TextEditingController();
+  final _imageUrlCtrl = TextEditingController();
 
   static const _days = [
     'Venerdì', 'Sabato', 'Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'
@@ -47,6 +48,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
     _dinnerSeatsCtrl.dispose();
     _totalSeatsCtrl.dispose();
     _tagsCtrl.dispose();
+    _imageUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -96,6 +98,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
             .where((t) => t.isNotEmpty)
             .toList(),
         'color': _selectedColor,
+        'imageUrl': _imageUrlCtrl.text.trim(),
       });
       if (mounted) {
         Navigator.of(context).pop(true);
@@ -119,23 +122,48 @@ class _AddEventScreenState extends State<AddEventScreen> {
       controller: ctrl,
       keyboardType: type,
       maxLines: maxLines,
-      style: GoogleFonts.montserrat(fontSize: 13, color: kText),
-      decoration: InputDecoration(hintText: hint),
+      style: GoogleFonts.montserrat(fontSize: 13, color: Colors.black),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.montserrat(fontSize: 13, color: const Color(0xFF558B2F)),
+        filled: true,
+        fillColor: const Color(0xFFE8F5E9),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
     );
   }
 
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: labelSmall()),
+        child: Text(text,
+            style: GoogleFonts.montserrat(
+                fontSize: 11,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1)),
       );
 
   @override
   Widget build(BuildContext context) {
+    final previewUrl = _imageUrlCtrl.text.trim();
+
     return Dialog(
-      backgroundColor: const Color(0xFF0E0A14),
+      backgroundColor: const Color(0xFF4CAF50),
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: kCardBorder)),
+          side: const BorderSide(color: Color(0xFF2E7D32))),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: SingleChildScrollView(
@@ -146,8 +174,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
             children: [
               Text('Pubblica Nuovo Evento',
                   style: GoogleFonts.cormorantGaramond(
-                      fontSize: 26, fontWeight: FontWeight.w300, color: kText)),
-              const Divider(color: kCardBorder),
+                      fontSize: 26, fontWeight: FontWeight.w300, color: Colors.black)),
+              const Divider(color: Color(0xFF2E7D32)),
               const SizedBox(height: 16),
 
               // Titolo
@@ -167,8 +195,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1A1020),
-                          border: Border.all(color: kCardBorder),
+                          color: const Color(0xFFE8F5E9),
+                          border: Border.all(color: const Color(0xFF2E7D32)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -178,8 +206,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
                           style: GoogleFonts.montserrat(
                               fontSize: 13,
                               color: _selectedDate != null
-                                  ? kText
-                                  : const Color(0xFF3D2E4A)),
+                                  ? Colors.black
+                                  : const Color(0xFF558B2F)),
                         ),
                       ),
                     ),
@@ -192,9 +220,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     _label('Giorno'),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedDay,
-                      dropdownColor: kCard,
+                      dropdownColor: const Color(0xFFE8F5E9),
                       style: GoogleFonts.montserrat(
-                          fontSize: 13, color: kText),
+                          fontSize: 13, color: Colors.black),
                       decoration: const InputDecoration(),
                       items: _days
                           .map((d) => DropdownMenuItem(value: d, child: Text(d)))
@@ -249,6 +277,44 @@ class _AddEventScreenState extends State<AddEventScreen> {
               _field('Tango, Live Music', _tagsCtrl),
               const SizedBox(height: 14),
 
+              // Immagine
+              _label('Immagine (URL)'),
+              StatefulBuilder(
+                builder: (context, setInner) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _imageUrlCtrl,
+                      style: GoogleFonts.montserrat(fontSize: 13, color: kText),
+                      decoration: const InputDecoration(
+                          hintText: 'https://esempio.com/immagine.jpg'),
+                      onChanged: (_) => setInner(() {}),
+                    ),
+                    if (previewUrl.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          previewUrl,
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, err, st) => Container(
+                            height: 120,
+                            color: kCard,
+                            alignment: Alignment.center,
+                            child: Text('URL non valido',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 12, color: kError)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+
               // Colore tema
               _label('Colore Tema'),
               Row(
@@ -282,8 +348,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: kTextSecond,
-                      side: const BorderSide(color: kCardBorder),
+                      foregroundColor: Colors.black,
+                      side: const BorderSide(color: Color(0xFF2E7D32)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
