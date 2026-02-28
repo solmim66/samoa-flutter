@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/booking_model.dart';
 import '../models/event_model.dart';
+import '../providers/auth_provider.dart';
 import '../services/booking_service.dart';
 import '../theme/app_theme.dart';
+import 'booking_screen.dart';
 
 class ManagerBookingsScreen extends StatefulWidget {
   final List<EventModel> events;
@@ -38,6 +40,58 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     return d.isBefore(todayDate);
+  }
+
+  void _editBooking(BuildContext ctx, BookingModel b, EventModel ev) {
+    final clientUser = UserModel(
+      uid: b.uid,
+      email: b.email,
+      name: b.customerName,
+      role: 'customer',
+    );
+    showDialog(
+      context: ctx,
+      builder: (_) => BookingScreen(
+        event: ev,
+        user: clientUser,
+        existingBooking: b,
+      ),
+    );
+  }
+
+  Future<void> _cancelBooking(BuildContext ctx, BookingModel b) async {
+    final ev = _getEvent(b.eventId);
+    final ok = await showDialog<bool>(
+      context: ctx,
+      builder: (_) => AlertDialog(
+        backgroundColor: kCard,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: kCardBorder)),
+        title: Text('Cancella prenotazione',
+            style: GoogleFonts.abrilFatface(fontSize: 20, color: kText)),
+        content: Text(
+            'Cancellare la prenotazione di "${b.customerName}" per "${ev?.title ?? "questo evento"}"?',
+            style: GoogleFonts.montserrat(fontSize: 13, color: kTextSecond)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annulla')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFCC4444)),
+            child: const Text('Cancella'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await BookingService.cancelBooking(b);
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+            const SnackBar(content: Text('Prenotazione cancellata.')));
+      }
+    }
   }
 
   Widget _buildList(List<BookingModel> bookings) {
@@ -107,6 +161,46 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                         label: Text('Conferma Arrivo',
                             style: GoogleFonts.montserrat(
                                 fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                    if (b.status != 'cancellata') ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: ev != null
+                                  ? () => _editBooking(context, b, ev)
+                                  : null,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFD4A853),
+                                side: const BorderSide(color: Color(0xFF5A4000)),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Text('✏ Modifica',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 12, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _cancelBooking(context, b),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFCC4444),
+                                side: const BorderSide(color: Color(0xFF4A1A1A)),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: Text('🗑 Cancella',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 12, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ],
@@ -241,8 +335,8 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case 'presente':
-        bg = const Color(0xFF00897B);
-        fg = Colors.white;
+        bg = Colors.black;
+        fg = const Color(0xFFFDD835);
         label = '✔ Presente';
         break;
       case 'modificata':

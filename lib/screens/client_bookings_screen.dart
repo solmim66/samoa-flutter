@@ -335,8 +335,8 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case 'presente':
-        bg = const Color(0xFF00897B);
-        fg = Colors.white;
+        bg = Colors.black;
+        fg = const Color(0xFFFDD835);
         label = '✔ Presente';
         break;
       case 'modificata':
