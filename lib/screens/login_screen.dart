@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final inputStyle = GoogleFonts.montserrat(fontSize: 13, color: kText);
+    final inputStyle = GoogleFonts.montserrat(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w700);
 
     return Dialog(
       backgroundColor: const Color(0xFF0E0A14),
@@ -85,14 +85,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text('💃', style: TextStyle(fontSize: 40)),
               const SizedBox(height: 8),
               Text(_isRegister ? 'Registrati' : 'Bentornato',
-                  style: GoogleFonts.cormorantGaramond(
-                      fontSize: 30, fontWeight: FontWeight.w300, color: kText)),
+                  style: GoogleFonts.abrilFatface(
+                      fontSize: 38, fontWeight: FontWeight.w700, color: Colors.white)),
               const SizedBox(height: 6),
               Text(
                 _isRegister
                     ? 'Crea il tuo account gratuito'
                     : 'Accedi per prenotare i tuoi eventi preferiti',
-                style: GoogleFonts.montserrat(fontSize: 12, color: kTextMuted),
+                style: GoogleFonts.montserrat(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 24),
 
@@ -102,8 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _loading ? null : _handleGoogle,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: kText,
-                    side: const BorderSide(color: kCardBorder),
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white54),
                     backgroundColor: const Color(0xFF1A1020),
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     shape: RoundedRectangleBorder(
@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   icon: const _GoogleIcon(),
                   label: Text('Accedi con Google',
-                      style: GoogleFonts.montserrat(fontSize: 13)),
+                      style: GoogleFonts.montserrat(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text('oppure',
                       style: GoogleFonts.montserrat(
-                          fontSize: 11, color: kTextMuted)),
+                          fontSize: 14, color: Colors.white, fontWeight: FontWeight.w700)),
                 ),
                 const Expanded(child: Divider(color: kCardBorder)),
               ]),
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _isRegister ? 'Crea Account' : 'Accedi',
                           style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                              fontSize: 16,
                               letterSpacing: 1),
                         ),
                 ),
@@ -183,38 +183,28 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               // ── Toggle login/registrazione ────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _isRegister
-                        ? 'Hai già un account? '
-                        : 'Non hai un account? ',
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => setState(() => _isRegister = !_isRegister),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white54),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(
+                    _isRegister ? 'Hai già un account? Accedi' : 'Non hai un account? Registrati',
                     style: GoogleFonts.montserrat(
-                        fontSize: 12, color: kTextMuted),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        letterSpacing: 1),
                   ),
-                  GestureDetector(
-                    onTap: () =>
-                        setState(() => _isRegister = !_isRegister),
-                    child: Text(
-                      _isRegister ? 'Accedi' : 'Registrati',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 12, color: kPurple),
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(height: 16),
 
-              // ── Hint manager ─────────────────────────────────────────────
-              const Divider(color: kCardBorder),
-              const SizedBox(height: 12),
-              Text(
-                'ACCESSO GESTORI: accedi con manager@saladanza.it',
-                style: GoogleFonts.montserrat(
-                    fontSize: 10, color: kTextMuted, letterSpacing: 1),
-                textAlign: TextAlign.center,
-              ),
             ],
           ),
         ),

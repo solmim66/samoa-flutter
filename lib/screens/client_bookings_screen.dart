@@ -154,8 +154,8 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
                 ],
               ),
 
-              // ── Pulsanti modifica/cancella (solo future non cancellate) ──
-              if (canEdit && !isCancelled) ...[
+              // ── Pulsanti modifica/cancella (solo future non cancellate e non presenti) ──
+              if (canEdit && !isCancelled && b.status != 'presente') ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [

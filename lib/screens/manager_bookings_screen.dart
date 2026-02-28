@@ -168,13 +168,13 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton(
+                            child: ElevatedButton(
                               onPressed: ev != null
                                   ? () => _editBooking(context, b, ev)
                                   : null,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFFD4A853),
-                                side: const BorderSide(color: Color(0xFF5A4000)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFDD835),
+                                foregroundColor: Colors.black,
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
@@ -186,11 +186,11 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: OutlinedButton(
+                            child: ElevatedButton(
                               onPressed: () => _cancelBooking(context, b),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFFCC4444),
-                                side: const BorderSide(color: Color(0xFF4A1A1A)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFCC4444),
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
