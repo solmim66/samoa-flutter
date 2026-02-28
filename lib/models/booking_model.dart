@@ -35,7 +35,7 @@ class BookingModel {
       option: map['option'] as String? ?? 'entrance',
       guests: (map['guests'] as num?)?.toInt() ?? 1,
       notes: map['notes'] as String? ?? '',
-      status: map['status'] as String? ?? 'confirmed',
+      status: map['status'] as String? ?? 'confermata',
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
     );
   }

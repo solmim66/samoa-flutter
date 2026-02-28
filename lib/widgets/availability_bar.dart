@@ -14,21 +14,14 @@ class AvailabilityBar extends StatelessWidget {
     final available = total - booked;
     final soldOut = booked >= total;
 
-    final Color barColor = soldOut
-        ? kError
-        : pct > 0.8
-            ? kWarning
-            : kPurpleDark;
+    const Color green = Color(0xFF2E7D32);   // verde intenso 100%
+    const Color blue  = Color(0xFF1565C0);   // blu intenso 100%
 
-    final String label = soldOut
-        ? 'ESAURITO'
-        : '$available rimasti';
+    final Color barColor = soldOut ? kError : blue;
 
-    final Color labelColor = soldOut
-        ? kError
-        : pct > 0.8
-            ? kWarning
-            : kSuccess;
+    final String label = soldOut ? 'ESAURITO' : '$available rimasti';
+
+    final Color labelColor = soldOut ? kError : green;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +31,8 @@ class AvailabilityBar extends StatelessWidget {
           children: [
             Text('DISPONIBILITÀ',
                 style: GoogleFonts.montserrat(
-                    fontSize: 11, color: kTextMuted, letterSpacing: 1)),
+                    fontSize: 11, color: blue, letterSpacing: 1,
+                    fontWeight: FontWeight.w600)),
             Text(label,
                 style: GoogleFonts.montserrat(
                     fontSize: 11,

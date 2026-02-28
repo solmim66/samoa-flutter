@@ -21,6 +21,10 @@ class EventService {
     await _col.doc(id).delete();
   }
 
+  static Future<void> updateEvent(String id, Map<String, dynamic> data) async {
+    await _col.doc(id).update(data);
+  }
+
   static Future<void> confirmBooking({
     required String eventId,
     required Map<String, dynamic> bookingData,

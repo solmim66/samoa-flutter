@@ -7,15 +7,19 @@ import 'availability_bar.dart';
 class EventCard extends StatefulWidget {
   final EventModel event;
   final bool isManager;
+  final bool isPast;
   final VoidCallback onBook;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   const EventCard({
     super.key,
     required this.event,
     required this.isManager,
+    this.isPast = false,
     required this.onBook,
     required this.onDelete,
+    required this.onEdit,
   });
 
   @override
@@ -25,15 +29,17 @@ class EventCard extends StatefulWidget {
 class _EventCardState extends State<EventCard> {
   bool _hovered = false;
 
+  String _formatPrice(String price) {
+    if (price == 'Esaurito') return price;
+    final digits = price.replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.isEmpty ? price : '€. $digits';
+  }
+
   String _formatDate(String dateStr) {
     if (dateStr.isEmpty) return '';
     try {
       final d = DateTime.parse(dateStr);
-      const months = [
-        '', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
-        'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
-      ];
-      return '${d.day} ${months[d.month]} ${d.year}';
+      return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
     } catch (_) {
       return dateStr;
     }
@@ -65,6 +71,8 @@ class _EventCardState extends State<EventCard> {
           children: [
             // ── Header (immagine o gradiente) ─────────────────────────────
             Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 160),
               decoration: BoxDecoration(
                 gradient: event.imageUrl.isEmpty
                     ? LinearGradient(
@@ -135,26 +143,26 @@ class _EventCardState extends State<EventCard> {
                         ),
                         child: Text(tag.toUpperCase(),
                             style: GoogleFonts.montserrat(
-                                fontSize: 10, color: kText, letterSpacing: 1)),
+                                fontSize: 10, color: Colors.white, letterSpacing: 1)),
                       )).toList(),
                     ),
                   if (event.tags.isNotEmpty) const SizedBox(height: 10),
                   Text('${event.day} — ${_formatDate(event.date)}',
                       style: GoogleFonts.montserrat(
                           fontSize: 11,
-                          color: kText.withValues(alpha: 0.6),
+                          color: Colors.white,
                           letterSpacing: 2)),
                   const SizedBox(height: 6),
                   Text(event.title,
-                      style: GoogleFonts.cormorantGaramond(
+                      style: GoogleFonts.abrilFatface(
                           fontSize: 26,
                           fontWeight: FontWeight.w300,
-                          color: kText,
+                          color: Colors.white,
                           height: 1.2)),
                   const SizedBox(height: 6),
                   Text('🎵 ${event.dj}  ·  🕘 ${event.time}',
                       style: GoogleFonts.montserrat(
-                          fontSize: 12, color: kText.withValues(alpha: 0.7))),
+                          fontSize: 12, color: Colors.white)),
                 ],
               ),
                   ),
@@ -170,29 +178,31 @@ class _EventCardState extends State<EventCard> {
                 children: [
                   // Descrizione
                   Text(event.description,
-                      style: GoogleFonts.cormorantGaramond(
+                      style: GoogleFonts.abrilFatface(
                           fontSize: 16,
                           fontStyle: FontStyle.italic,
-                          color: const Color(0xFFB09878),
+                          color: kText,
                           height: 1.5)),
                   const SizedBox(height: 16),
 
                   // Barra disponibilità
-                  AvailabilityBar(booked: event.totalBooked, total: event.totalSeats),
-                  const SizedBox(height: 16),
+                  if (!widget.isPast || widget.isManager) ...[
+                    AvailabilityBar(booked: event.totalBooked, total: event.totalSeats),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Box prezzi
                   Row(
                     children: [
                       Expanded(child: _PriceBox(
                         label: 'Solo Ingresso',
-                        price: event.entrancePrice,
+                        price: _formatPrice(event.entrancePrice),
                         soldOut: false,
                       )),
                       const SizedBox(width: 10),
                       Expanded(child: _PriceBox(
                         label: 'Cena  (${event.dinnerSeats - event.dinnerBooked} posti)',
-                        price: event.dinnerSoldOut ? 'Esaurito' : event.dinnerPrice,
+                        price: event.dinnerSoldOut ? 'Esaurito' : _formatPrice(event.dinnerPrice),
                         soldOut: event.dinnerSoldOut,
                       )),
                     ],
@@ -204,16 +214,20 @@ class _EventCardState extends State<EventCard> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: event.soldOut ? null : widget.onBook,
+                        onPressed: (event.soldOut || widget.isPast) ? null : widget.onBook,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: event.soldOut ? kCardBorder : null,
-                          foregroundColor: event.soldOut ? const Color(0xFF555555) : Colors.white,
+                          backgroundColor: (event.soldOut || widget.isPast) ? kCardBorder : null,
+                          foregroundColor: (event.soldOut || widget.isPast) ? const Color(0xFF555555) : Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          event.soldOut ? 'Evento Esaurito' : 'Prenota Ora',
+                          widget.isPast
+                              ? 'Evento Passato'
+                              : event.soldOut
+                                  ? 'Evento Esaurito'
+                                  : 'Prenota Ora',
                           style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
@@ -222,20 +236,38 @@ class _EventCardState extends State<EventCard> {
                       ),
                     )
                   else
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: widget.onDelete,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFCC4444),
-                          side: const BorderSide(color: Color(0xFF4A1A1A)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: widget.onEdit,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFD4A853),
+                              side: const BorderSide(color: Color(0xFF5A4000)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text('✏ Modifica',
+                                style: GoogleFonts.montserrat(fontSize: 13)),
+                          ),
                         ),
-                        child: Text('🗑 Elimina Evento',
-                            style: GoogleFonts.montserrat(fontSize: 13)),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: widget.onDelete,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFCC4444),
+                              side: const BorderSide(color: Color(0xFF4A1A1A)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text('🗑 Elimina',
+                                style: GoogleFonts.montserrat(fontSize: 13)),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
@@ -269,15 +301,15 @@ class _PriceBox extends StatelessWidget {
           Text(label,
               style: GoogleFonts.montserrat(
                   fontSize: 10,
-                  color: kTextMuted,
+                  color: Colors.white,
                   letterSpacing: 1),
               textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text(price,
-              style: GoogleFonts.cormorantGaramond(
+              style: GoogleFonts.abrilFatface(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  color: soldOut ? const Color(0xFF555555) : kGold)),
+                  color: soldOut ? const Color(0xFF888888) : Colors.white)),
         ],
       ),
     );

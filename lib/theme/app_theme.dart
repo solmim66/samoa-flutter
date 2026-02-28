@@ -32,13 +32,13 @@ List<Color> getEventGradient(String? colorHex) {
 
 // ─── TextStyle helpers ────────────────────────────────────────────────────────
 TextStyle headingLarge({double fontSize = 48, Color color = kText, FontStyle fontStyle = FontStyle.normal}) =>
-    GoogleFonts.cormorantGaramond(fontSize: fontSize, fontWeight: FontWeight.w300, color: color, fontStyle: fontStyle);
+    GoogleFonts.abrilFatface(fontSize: fontSize, color: color, fontStyle: fontStyle);
 
 TextStyle headingMedium({double fontSize = 28, Color color = kText}) =>
-    GoogleFonts.cormorantGaramond(fontSize: fontSize, fontWeight: FontWeight.w300, color: color);
+    GoogleFonts.abrilFatface(fontSize: fontSize, color: color);
 
 TextStyle headingSmall({double fontSize = 22, Color color = kText}) =>
-    GoogleFonts.cormorantGaramond(fontSize: fontSize, fontWeight: FontWeight.w600, color: color);
+    GoogleFonts.abrilFatface(fontSize: fontSize, color: color);
 
 TextStyle bodyLarge({double fontSize = 15, Color color = kText, FontWeight fontWeight = FontWeight.w400}) =>
     GoogleFonts.montserrat(fontSize: fontSize, color: color, fontWeight: fontWeight);

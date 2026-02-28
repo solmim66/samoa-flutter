@@ -2,11 +2,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/event_model.dart';
 import '../services/event_service.dart';
 import '../theme/app_theme.dart';
 
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
+  final EventModel? event; // se presente → modalità modifica
+
+  const AddEventScreen({super.key, this.event});
 
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
@@ -23,18 +26,50 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   final _djCtrl = TextEditingController();
-  final _timeCtrl = TextEditingController(text: '21:00 – 02:00');
-  final _dinnerTimeCtrl = TextEditingController(text: '20:00');
-  final _dinnerPriceCtrl = TextEditingController(text: '€45');
-  final _entrancePriceCtrl = TextEditingController(text: '€18');
-  final _dinnerSeatsCtrl = TextEditingController(text: '40');
-  final _totalSeatsCtrl = TextEditingController(text: '200');
+  final _timeCtrl = TextEditingController(text: '21:30 – 01:00');
+  final _dinnerTimeCtrl = TextEditingController(text: '19:30');
+  final _dinnerPriceCtrl = TextEditingController(text: '€. 18');
+  final _entrancePriceCtrl = TextEditingController(text: '€. 8');
+  final _dinnerSeatsCtrl = TextEditingController(text: '150');
+  final _totalSeatsCtrl = TextEditingController(text: '300');
   final _tagsCtrl = TextEditingController();
   final _imageUrlCtrl = TextEditingController();
 
   static const _days = [
     'Venerdì', 'Sabato', 'Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.event;
+    if (e != null) {
+      _titleCtrl.text = e.title;
+      _descCtrl.text = e.description;
+      _djCtrl.text = e.dj;
+      _timeCtrl.text = e.time;
+      _dinnerTimeCtrl.text = e.dinnerTime;
+      _dinnerPriceCtrl.text = e.dinnerPrice;
+      _entrancePriceCtrl.text = e.entrancePrice;
+      _dinnerSeatsCtrl.text = e.dinnerSeats.toString();
+      _totalSeatsCtrl.text = e.totalSeats.toString();
+      _tagsCtrl.text = e.tags.join(', ');
+      _imageUrlCtrl.text = e.imageUrl;
+      _selectedColor = e.color;
+      _selectedDay = e.day;
+      _selectedDate = DateTime.tryParse(e.date);
+    }
+  }
+
+  void _updatePricesForDay(String day) {
+    if (day == 'Sabato') {
+      _entrancePriceCtrl.text = '€. 10';
+      _dinnerPriceCtrl.text = '€. 20';
+    } else if (day == 'Venerdì') {
+      _entrancePriceCtrl.text = '€. 8';
+      _dinnerPriceCtrl.text = '€. 18';
+    }
+  }
 
   static const _colors = [
     '#8B1A1A', '#1A3A5C', '#3D6B3D', '#7A3B00', '#4A1A6B', '#1A4A4A',
@@ -64,7 +99,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
       lastDate: DateTime.now().add(const Duration(days: 730)),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(primary: kPurple, surface: kCard),
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF0D2B6B),      // blu scuro — giorno selezionato
+            onPrimary: Colors.white,          // testo sul giorno selezionato
+            surface: Colors.white,            // sfondo calendario
+            onSurface: Color(0xFF0D2B6B),    // testo giorni
+          ),
+          dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
         ),
         child: child!,
       ),
@@ -75,40 +116,49 @@ class _AddEventScreenState extends State<AddEventScreen> {
   String _formatDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-  String _priceWithEuro(String s) =>
-      s.startsWith('€') ? s : '€$s';
+  String _displayDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  String _priceWithEuro(String s) {
+    final digits = s.replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.isEmpty ? s : '€. $digits';
+  }
 
   Future<void> _submit() async {
     if (_titleCtrl.text.isEmpty || _selectedDate == null) return;
     setState(() => _loading = true);
+    final isEdit = widget.event != null;
+    final data = {
+      'title': _titleCtrl.text.trim(),
+      'date': _formatDate(_selectedDate!),
+      'day': _selectedDay,
+      'description': _descCtrl.text.trim(),
+      'dj': _djCtrl.text.trim(),
+      'time': _timeCtrl.text.trim(),
+      'dinnerTime': _dinnerTimeCtrl.text.trim(),
+      'dinnerPrice': _priceWithEuro(_dinnerPriceCtrl.text.trim()),
+      'entrancePrice': _priceWithEuro(_entrancePriceCtrl.text.trim()),
+      'dinnerSeats': int.tryParse(_dinnerSeatsCtrl.text) ?? 40,
+      'totalSeats': int.tryParse(_totalSeatsCtrl.text) ?? 200,
+      'tags': _tagsCtrl.text
+          .split(',')
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList(),
+      'color': _selectedColor,
+      'imageUrl': _imageUrlCtrl.text.trim(),
+    };
     try {
-      await EventService.addEvent({
-        'title': _titleCtrl.text.trim(),
-        'date': _formatDate(_selectedDate!),
-        'day': _selectedDay,
-        'description': _descCtrl.text.trim(),
-        'dj': _djCtrl.text.trim(),
-        'time': _timeCtrl.text.trim(),
-        'dinnerTime': _dinnerTimeCtrl.text.trim(),
-        'dinnerPrice': _priceWithEuro(_dinnerPriceCtrl.text.trim()),
-        'entrancePrice': _priceWithEuro(_entrancePriceCtrl.text.trim()),
-        'dinnerSeats': int.tryParse(_dinnerSeatsCtrl.text) ?? 40,
-        'totalSeats': int.tryParse(_totalSeatsCtrl.text) ?? 200,
-        'dinnerBooked': 0,
-        'totalBooked': 0,
-        'tags': _tagsCtrl.text
-            .split(',')
-            .map((t) => t.trim())
-            .where((t) => t.isNotEmpty)
-            .toList(),
-        'color': _selectedColor,
-        'imageUrl': _imageUrlCtrl.text.trim(),
-      });
+      if (isEdit) {
+        await EventService.updateEvent(widget.event!.id, data);
+      } else {
+        await EventService.addEvent({...data, 'dinnerBooked': 0, 'totalBooked': 0});
+      }
       if (mounted) {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Evento pubblicato! ✨'),
-          backgroundColor: Color(0xFF1A3A1A),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(isEdit ? 'Evento aggiornato! ✓' : 'Evento pubblicato! ✨'),
+          backgroundColor: const Color(0xFF1A3A1A),
         ));
       }
     } catch (e) {
@@ -211,8 +261,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Pubblica Nuovo Evento',
-                  style: GoogleFonts.cormorantGaramond(
+              Text(widget.event != null ? 'Modifica Evento' : 'Pubblica Nuovo Evento',
+                  style: GoogleFonts.abrilFatface(
                       fontSize: 26, fontWeight: FontWeight.w300, color: Colors.black)),
               const Divider(color: Color(0xFF2E7D32)),
               const SizedBox(height: 16),
@@ -240,7 +290,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         ),
                         child: Text(
                           _selectedDate != null
-                              ? _formatDate(_selectedDate!)
+                              ? _displayDate(_selectedDate!)
                               : 'Seleziona data',
                           style: GoogleFonts.montserrat(
                               fontSize: 13,
@@ -266,8 +316,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
                       items: _days
                           .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                           .toList(),
-                      onChanged: (v) =>
-                          setState(() => _selectedDay = v ?? _selectedDay),
+                      onChanged: (v) => setState(() {
+                        _selectedDay = v ?? _selectedDay;
+                        _updatePricesForDay(_selectedDay);
+                      }),
                     ),
                   ],
                 )),
@@ -288,7 +340,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 const SizedBox(width: 10),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [_label('Orario Serata'), _field('21:00 – 02:00', _timeCtrl)],
+                  children: [_label('Orario Serata'), _field('21:30 – 01:00', _timeCtrl)],
                 )),
               ]),
               const SizedBox(height: 14),
@@ -296,18 +348,18 @@ class _AddEventScreenState extends State<AddEventScreen> {
               // Prezzi e posti
               Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Ingresso'), _field('€18', _entrancePriceCtrl)])),
+                    children: [_label('Ingresso'), _field('€. 8', _entrancePriceCtrl)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Cena'), _field('€45', _dinnerPriceCtrl)])),
+                    children: [_label('Cena'), _field('€. 18', _dinnerPriceCtrl)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                     children: [_label('Posti Cena'),
-                      _field('40', _dinnerSeatsCtrl, type: TextInputType.number)])),
+                      _field('150', _dinnerSeatsCtrl, type: TextInputType.number)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                     children: [_label('Posti Tot.'),
-                      _field('200', _totalSeatsCtrl, type: TextInputType.number)])),
+                      _field('300', _totalSeatsCtrl, type: TextInputType.number)])),
               ]),
               const SizedBox(height: 14),
 
@@ -464,7 +516,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                             width: 18,
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: Colors.white))
-                        : Text('Pubblica Evento',
+                        : Text(widget.event != null ? 'Salva Modifiche' : 'Pubblica Evento',
                             style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,

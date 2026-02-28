@@ -1,25 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/booking_model.dart';
 import '../models/event_model.dart';
 import '../providers/auth_provider.dart';
+import '../services/booking_service.dart';
 import '../services/event_service.dart';
 import '../theme/app_theme.dart';
 
 class BookingScreen extends StatefulWidget {
   final EventModel event;
   final UserModel user;
+  final BookingModel? existingBooking;
 
-  const BookingScreen({super.key, required this.event, required this.user});
+  const BookingScreen({
+    super.key,
+    required this.event,
+    required this.user,
+    this.existingBooking,
+  });
 
   @override
   State<BookingScreen> createState() => _BookingScreenState();
 }
 
 class _BookingScreenState extends State<BookingScreen> {
-  String _option = 'entrance'; // 'entrance' | 'dinner'
-  int _guests = 1;
+  late String _option;
+  late int _guests;
   final _notesCtrl = TextEditingController();
   bool _loading = false;
+
+  bool get _isEdit => widget.existingBooking != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEdit) {
+      _option = widget.existingBooking!.option;
+      _guests = widget.existingBooking!.guests;
+      _notesCtrl.text = widget.existingBooking!.notes;
+    } else {
+      _option = 'entrance';
+      _guests = 1;
+    }
+  }
 
   @override
   void dispose() {
@@ -27,15 +50,17 @@ class _BookingScreenState extends State<BookingScreen> {
     super.dispose();
   }
 
+  String _formatPrice(String price) {
+    if (price == 'Esaurito') return price;
+    final digits = price.replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.isEmpty ? price : '€. $digits';
+  }
+
   String _formatDate(String dateStr) {
     if (dateStr.isEmpty) return '';
     try {
       final d = DateTime.parse(dateStr);
-      const months = [
-        '', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
-        'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
-      ];
-      return '${d.day} ${months[d.month]} ${d.year}';
+      return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
     } catch (_) {
       return dateStr;
     }
@@ -50,26 +75,38 @@ class _BookingScreenState extends State<BookingScreen> {
   Future<void> _confirm() async {
     setState(() => _loading = true);
     try {
-      await EventService.confirmBooking(
-        eventId: widget.event.id,
-        bookingData: {
-          'eventId': widget.event.id,
-          'customerName': widget.user.name,
-          'email': widget.user.email,
-          'uid': widget.user.uid,
-          'option': _option,
-          'guests': _guests,
-          'notes': _notesCtrl.text.trim(),
-          'status': 'confirmed',
-        },
-        guests: _guests,
-        isDinner: _option == 'dinner',
-      );
+      final bookingData = {
+        'eventId': widget.event.id,
+        'customerName': widget.user.name,
+        'email': widget.user.email,
+        'uid': widget.user.uid,
+        'option': _option,
+        'guests': _guests,
+        'notes': _notesCtrl.text.trim(),
+      };
+
+      if (_isEdit) {
+        await BookingService.updateBooking(
+          old: widget.existingBooking!,
+          newData: bookingData,
+          newGuests: _guests,
+          newIsDinner: _option == 'dinner',
+        );
+      } else {
+        await EventService.confirmBooking(
+          eventId: widget.event.id,
+          bookingData: {...bookingData, 'status': 'confermata'},
+          guests: _guests,
+          isDinner: _option == 'dinner',
+        );
+      }
+
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              '✓ Prenotazione confermata per "${widget.event.title}"!'),
+          content: Text(_isEdit
+              ? '✓ Prenotazione modificata!'
+              : '✓ Prenotazione confermata per "${widget.event.title}"!'),
           backgroundColor: const Color(0xFF1A3A1A),
         ));
       }
@@ -101,15 +138,20 @@ class _BookingScreenState extends State<BookingScreen> {
             children: [
               // ── Header ───────────────────────────────────────────────────
               const Divider(color: kCardBorder),
-              Text('PRENOTAZIONE',
-                  style: labelSmall(letterSpacing: 2)),
+              Text(_isEdit ? 'MODIFICA PRENOTAZIONE' : 'PRENOTAZIONE',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 11,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2)),
               const SizedBox(height: 6),
               Text(event.title,
-                  style: GoogleFonts.cormorantGaramond(
-                      fontSize: 28, fontWeight: FontWeight.w300, color: kText)),
+                  style: GoogleFonts.abrilFatface(
+                      fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white)),
               const SizedBox(height: 4),
               Text('${event.day} — ${_formatDate(event.date)}',
-                  style: labelSmall()),
+                  style: GoogleFonts.montserrat(
+                      fontSize: 15, color: kGold, fontWeight: FontWeight.w700)),
               const Divider(color: kCardBorder),
               const SizedBox(height: 16),
 
@@ -117,13 +159,13 @@ class _BookingScreenState extends State<BookingScreen> {
               RichText(
                 text: TextSpan(
                   style: GoogleFonts.montserrat(
-                      fontSize: 13, color: const Color(0xFFB09878)),
+                      fontSize: 13, color: Colors.white, fontWeight: FontWeight.w700),
                   children: [
                     const TextSpan(text: 'Prenotazione per: '),
                     TextSpan(
                       text: '${widget.user.name} (${widget.user.email})',
                       style: const TextStyle(
-                          color: kText, fontWeight: FontWeight.w600),
+                          color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
@@ -131,14 +173,16 @@ class _BookingScreenState extends State<BookingScreen> {
               const SizedBox(height: 20),
 
               // ── Selezione opzione ─────────────────────────────────────────
-              Text('Scegli la tua opzione', style: labelSmall()),
+              Text('Scegli la tua opzione',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(child: _OptionCard(
                     icon: '🎟',
                     label: 'Solo Ingresso',
-                    price: event.entrancePrice,
+                    price: _formatPrice(event.entrancePrice),
                     subtitle: '',
                     selected: _option == 'entrance',
                     disabled: false,
@@ -148,8 +192,8 @@ class _BookingScreenState extends State<BookingScreen> {
                   Expanded(child: _OptionCard(
                     icon: '🍽',
                     label: 'Cena + Ingresso',
-                    price: event.dinnerSoldOut ? 'Esaurito' : event.dinnerPrice,
-                    subtitle: event.dinnerSoldOut ? '' : 'Cena ore ${event.dinnerTime}',
+                    price: event.dinnerSoldOut ? 'Esaurito' : _formatPrice(event.dinnerPrice),
+                    subtitle: event.dinnerSoldOut ? '' : 'Cena dalle ore ${event.dinnerTime}',
                     selected: _option == 'dinner',
                     disabled: event.dinnerSoldOut,
                     onTap: () {
@@ -163,36 +207,40 @@ class _BookingScreenState extends State<BookingScreen> {
               const SizedBox(height: 20),
 
               // ── Numero persone ────────────────────────────────────────────
-              Text('Numero di persone', style: labelSmall()),
+              Text('Numero di persone',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Row(
                 children: [
                   _CircleBtn(
                     icon: '−',
-                    onTap: () => setState(
-                        () => _guests = (_guests - 1).clamp(1, 10)),
+                    onTap: () =>
+                        setState(() => _guests = (_guests - 1).clamp(1, 10)),
                   ),
                   const SizedBox(width: 16),
                   Text('$_guests',
-                      style: GoogleFonts.cormorantGaramond(
-                          fontSize: 28, color: kText)),
+                      style: GoogleFonts.abrilFatface(
+                          fontSize: 28, color: Colors.white)),
                   const SizedBox(width: 16),
                   _CircleBtn(
                     icon: '+',
-                    onTap: () => setState(
-                        () => _guests = (_guests + 1).clamp(1, 10)),
+                    onTap: () =>
+                        setState(() => _guests = (_guests + 1).clamp(1, 10)),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
 
               // ── Note ──────────────────────────────────────────────────────
-              Text('Note speciali', style: labelSmall()),
+              Text('Note speciali',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               TextField(
                 controller: _notesCtrl,
                 maxLines: 3,
-                style: GoogleFonts.montserrat(fontSize: 13, color: kText),
+                style: GoogleFonts.montserrat(fontSize: 13, color: Colors.black87),
                 decoration: const InputDecoration(
                     hintText: 'Allergie, richieste speciali…'),
               ),
@@ -200,7 +248,8 @@ class _BookingScreenState extends State<BookingScreen> {
 
               // ── Totale ────────────────────────────────────────────────────
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1020),
                   border: Border.all(color: kCardBorder),
@@ -212,13 +261,15 @@ class _BookingScreenState extends State<BookingScreen> {
                     Text(
                       'Totale ($_guests ${_guests > 1 ? "persone" : "persona"})',
                       style: GoogleFonts.montserrat(
-                          fontSize: 12, color: kTextSecond),
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700),
                     ),
-                    Text('€$_total',
-                        style: GoogleFonts.cormorantGaramond(
+                    Text('€. $_total',
+                        style: GoogleFonts.abrilFatface(
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
-                            color: kGold)),
+                            color: Colors.white)),
                   ],
                 ),
               ),
@@ -231,8 +282,8 @@ class _BookingScreenState extends State<BookingScreen> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: kTextSecond,
-                        side: const BorderSide(color: kCardBorder),
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white54),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
@@ -257,7 +308,10 @@ class _BookingScreenState extends State<BookingScreen> {
                               width: 18,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white))
-                          : Text('Conferma Prenotazione',
+                          : Text(
+                              _isEdit
+                                  ? 'Salva Modifiche'
+                                  : 'Conferma Prenotazione',
                               style: GoogleFonts.montserrat(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 13,
@@ -297,10 +351,10 @@ class _OptionCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
           border: Border.all(
-              color: selected ? kPurple : kCardBorder,
+              color: selected ? const Color(0xFF2E7D32) : kCardBorder,
               width: selected ? 2 : 1),
           borderRadius: BorderRadius.circular(8),
-          color: selected ? kPurple.withValues(alpha: 0.1) : Colors.transparent,
+          color: selected ? const Color(0xFF2E7D32) : Colors.transparent,
         ),
         child: Column(
           children: [
@@ -309,22 +363,30 @@ class _OptionCard extends StatelessWidget {
             Text(label,
                 style: GoogleFonts.montserrat(
                     fontSize: 12,
+                    fontWeight:
+                        selected ? FontWeight.w700 : FontWeight.w400,
                     color: disabled
                         ? const Color(0xFF444444)
                         : selected
-                            ? kPurple
+                            ? Colors.white
                             : const Color(0xFFB09878)),
                 textAlign: TextAlign.center),
             const SizedBox(height: 4),
             Text(price,
-                style: GoogleFonts.cormorantGaramond(
+                style: GoogleFonts.abrilFatface(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: disabled ? const Color(0xFF555555) : kGold)),
+                    color: disabled
+                        ? const Color(0xFF555555)
+                        : selected
+                            ? Colors.white
+                            : kGold)),
             if (subtitle.isNotEmpty)
               Text(subtitle,
                   style: GoogleFonts.montserrat(
-                      fontSize: 10, color: kTextMuted)),
+                      fontSize: 10,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700)),
           ],
         ),
       ),
@@ -351,7 +413,7 @@ class _CircleBtn extends StatelessWidget {
         ),
         child: Center(
           child: Text(icon,
-              style: const TextStyle(color: kPurple, fontSize: 20)),
+              style: const TextStyle(color: Colors.white, fontSize: 20)),
         ),
       ),
     );

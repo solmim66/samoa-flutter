@@ -22,7 +22,7 @@ class SamoaApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => AuthProvider(),
       child: MaterialApp(
-        title: 'Sala Danza & Spettacoli',
+        title: 'Samoa Village',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
         home: const HomeScreen(),

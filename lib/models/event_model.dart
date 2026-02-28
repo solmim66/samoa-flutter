@@ -89,12 +89,12 @@ class EventModel {
   double get availabilityPct => totalSeats > 0 ? totalBooked / totalSeats : 0;
 
   int get entrancePriceInt {
-    final s = entrancePrice.replaceAll('€', '').trim();
+    final s = entrancePrice.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(s) ?? 0;
   }
 
   int get dinnerPriceInt {
-    final s = dinnerPrice.replaceAll('€', '').trim();
+    final s = dinnerPrice.replaceAll(RegExp(r'[^0-9]'), '');
     return int.tryParse(s) ?? 0;
   }
 }
