@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/event_service.dart';
@@ -12,6 +14,8 @@ class AddEventScreen extends StatefulWidget {
 
 class _AddEventScreenState extends State<AddEventScreen> {
   bool _loading = false;
+  bool _uploading = false;
+  double _uploadProgress = 0.0;
   String _selectedColor = '#4A1A6B';
   String _selectedDay = 'Venerdì';
   DateTime? _selectedDate;
@@ -114,6 +118,41 @@ class _AddEventScreenState extends State<AddEventScreen> {
       }
     }
     if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    final bytes = file.bytes;
+    if (bytes == null) return;
+
+    setState(() { _uploading = true; _uploadProgress = 0.0; });
+    try {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      final ref = FirebaseStorage.instance.ref('events/images/$fileName');
+      final task = ref.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/${file.extension ?? 'jpeg'}'),
+      );
+      task.snapshotEvents.listen((snap) {
+        if (mounted && snap.totalBytes > 0) {
+          setState(() => _uploadProgress = snap.bytesTransferred / snap.totalBytes);
+        }
+      });
+      await task;
+      final url = await ref.getDownloadURL();
+      if (mounted) setState(() { _imageUrlCtrl.text = url; _uploading = false; });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _uploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Errore upload: $e'), backgroundColor: kError));
+      }
+    }
   }
 
   Widget _field(String hint, TextEditingController ctrl,
@@ -278,40 +317,91 @@ class _AddEventScreenState extends State<AddEventScreen> {
               const SizedBox(height: 14),
 
               // Immagine
-              _label('Immagine (URL)'),
-              StatefulBuilder(
-                builder: (context, setInner) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _imageUrlCtrl,
-                      style: GoogleFonts.montserrat(fontSize: 13, color: kText),
-                      decoration: const InputDecoration(
-                          hintText: 'https://esempio.com/immagine.jpg'),
-                      onChanged: (_) => setInner(() {}),
+              _label('Immagine'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Pulsante carica file
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _uploading ? null : _pickAndUploadImage,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Color(0xFF2E7D32)),
+                        backgroundColor: const Color(0xFFE8F5E9),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: _uploading
+                          ? SizedBox(
+                              width: 16, height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                value: _uploadProgress > 0 ? _uploadProgress : null,
+                                color: Colors.black,
+                              ))
+                          : const Icon(Icons.upload_file, size: 18),
+                      label: Text(
+                        _uploading
+                            ? 'Caricamento… ${(_uploadProgress * 100).toStringAsFixed(0)}%'
+                            : 'Carica Immagine dal computer',
+                        style: GoogleFonts.montserrat(fontSize: 13),
+                      ),
                     ),
-                    if (previewUrl.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      ClipRRect(
+                  ),
+                  const SizedBox(height: 8),
+                  // Campo URL manuale
+                  TextField(
+                    controller: _imageUrlCtrl,
+                    style: GoogleFonts.montserrat(fontSize: 13, color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: 'oppure incolla un URL…',
+                      hintStyle: GoogleFonts.montserrat(
+                          fontSize: 13, color: const Color(0xFF558B2F)),
+                      filled: true,
+                      fillColor: const Color(0xFFE8F5E9),
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          previewUrl,
+                        borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide:
+                            const BorderSide(color: Colors.black, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  // Anteprima
+                  if (previewUrl.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        previewUrl,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, st) => Container(
                           height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (ctx, err, st) => Container(
-                            height: 120,
-                            color: kCard,
-                            alignment: Alignment.center,
-                            child: Text('URL non valido',
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 12, color: kError)),
-                          ),
+                          color: const Color(0xFFE8F5E9),
+                          alignment: Alignment.center,
+                          child: Text('URL non valido',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: kError)),
                         ),
                       ),
-                    ],
+                    ),
                   ],
-                ),
+                ],
               ),
               const SizedBox(height: 14),
 
