@@ -1,4 +1,6 @@
 workflows:
+
+  # ── Web: Build + Deploy su Firebase Hosting ────────────────────────────────
   flutter-web:
     name: Flutter Web — Build & Deploy
     max_build_duration: 30
@@ -7,7 +9,7 @@ workflows:
       vars:
         FIREBASE_PROJECT_ID: samoa-439f8
       groups:
-        - firebase_credentials   # gruppo in Codemagic con FIREBASE_TOKEN
+        - firebase_credentials   # contiene: FIREBASE_TOKEN
 
     triggering:
       events:
@@ -38,6 +40,48 @@ workflows:
 
     artifacts:
       - build/web/**
+
+    publishing:
+      email:
+        recipients:
+          - placeholder@email.com   # <-- sostituisci con la tua email
+        notify:
+          success: true
+          failure: true
+
+  # ── Android: Build APK/AAB firmato ─────────────────────────────────────────
+  flutter-android:
+    name: Flutter Android — Build & Sign
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      android_signing:
+        - samoa_keystore   # gruppo in Codemagic con CM_KEYSTORE, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS, CM_KEY_PASSWORD
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    scripts:
+      - name: Installa dipendenze
+        script: flutter pub get
+
+      - name: Analisi statica
+        script: flutter analyze --no-fatal-warnings
+
+      - name: Decodifica keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > $CM_KEYSTORE_PATH
+
+      - name: Build Android AAB (release)
+        script: flutter build appbundle --release
+
+    artifacts:
+      - build/app/outputs/bundle/release/*.aab
+      - build/app/outputs/apk/release/*.apk
 
     publishing:
       email:
