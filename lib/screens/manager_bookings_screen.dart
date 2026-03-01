@@ -19,6 +19,14 @@ class ManagerBookingsScreen extends StatefulWidget {
 class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
   bool _showArchive = false;
 
+  static const _italianDays = [
+    'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'
+  ];
+  static const _italianMonths = [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ];
+
   EventModel? _getEvent(String id) {
     try {
       return widget.events.firstWhere((e) => e.id == id);
@@ -30,6 +38,10 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
   String _formatDate(DateTime? d) {
     if (d == null) return '';
     return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+  }
+
+  String _formatDateFull(DateTime d) {
+    return '${_italianDays[d.weekday - 1]} ${d.day} ${_italianMonths[d.month - 1]} ${d.year}';
   }
 
   bool _isEventPast(String eventId) {
@@ -94,132 +106,217 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
     }
   }
 
-  Widget _buildList(List<BookingModel> bookings) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+  Widget _buildCard(BookingModel b, EventModel? ev) {
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      itemCount: bookings.length,
-      separatorBuilder: (context, i) => const SizedBox(height: 12),
-      itemBuilder: (context, i) {
-        final b = bookings[i];
-        final ev = _getEvent(b.eventId);
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1565C0),
-            border: Border.all(color: const Color(0xFF0D47A1)),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(b.customerName,
-                        style: GoogleFonts.montserrat(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white)),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1565C0),
+          border: Border.all(color: const Color(0xFF0D47A1)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(b.customerName,
+                      style: GoogleFonts.montserrat(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
+                  const SizedBox(height: 4),
+                  Text('✉️ ${b.email}',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${b.isDinner ? "🍽 Cena + Ingresso" : "🎟 Solo Ingresso"} — ${b.guests} ${b.guests > 1 ? "persone" : "persona"}',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                  if (b.notes.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text('✉️ ${b.email}',
-                        style: GoogleFonts.montserrat(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 2),
-                    Text(
-                      '📅 ${ev?.title ?? "Evento"} — ${ev != null ? _formatDate(DateTime.tryParse(ev.date)) : ""}',
-                      style: GoogleFonts.montserrat(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${b.isDinner ? "🍽 Cena + Ingresso" : "🎟 Solo Ingresso"} — ${b.guests} ${b.guests > 1 ? "persone" : "persona"}',
-                      style: GoogleFonts.montserrat(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
-                    if (b.notes.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text('📝 ${b.notes}',
-                          style: GoogleFonts.montserrat(
-                              fontSize: 11,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w700,
-                              fontStyle: FontStyle.italic)),
-                    ],
-                    if (b.status != 'cancellata' && b.status != 'presente') ...[
-                      const SizedBox(height: 14),
-                      ElevatedButton.icon(
-                        onPressed: () => BookingService.confirmArrival(b.id),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00897B),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        icon: const Icon(Icons.how_to_reg, size: 16),
-                        label: Text('Conferma Arrivo',
-                            style: GoogleFonts.montserrat(
-                                fontSize: 12, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                    if (b.status != 'cancellata') ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
+                    Text('📝 ${b.notes}',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 11,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w700,
+                            fontStyle: FontStyle.italic)),
+                  ],
+                  if (b.status != 'cancellata') ...[
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        if (b.status != 'presente') ...[
                           Expanded(
-                            child: ElevatedButton(
-                              onPressed: ev != null
-                                  ? () => _editBooking(context, b, ev)
-                                  : null,
+                            child: ElevatedButton.icon(
+                              onPressed: () => BookingService.confirmArrival(b.id),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFDD835),
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Text('✏ Modifica',
-                                  style: GoogleFonts.montserrat(
-                                      fontSize: 12, fontWeight: FontWeight.w700)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => _cancelBooking(context, b),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFCC4444),
+                                backgroundColor: const Color(0xFF00C853),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: Text('🗑 Cancella',
+                              icon: const Icon(Icons.how_to_reg, size: 14),
+                              label: Text('Conferma Arrivo',
                                   style: GoogleFonts.montserrat(
-                                      fontSize: 12, fontWeight: FontWeight.w700)),
+                                      fontSize: 11, fontWeight: FontWeight.w700)),
                             ),
                           ),
+                          const SizedBox(width: 6),
                         ],
-                      ),
-                    ],
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: ev != null
+                                ? () => _editBooking(context, b, ev)
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFDD835),
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text('✏ Modifica',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 11, fontWeight: FontWeight.w700)),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _cancelBooking(context, b),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFCC4444),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text('🗑 Cancella',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 11, fontWeight: FontWeight.w700)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  _StatusBadge(status: b.status),
-                  const SizedBox(height: 8),
-                  Text(_formatDate(b.createdAt),
-                      style: GoogleFonts.montserrat(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
                 ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _StatusBadge(status: b.status),
+                const SizedBox(height: 8),
+                Text(_formatDate(b.createdAt),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget _buildGroupedList(List<BookingModel> bookings) {
+    // Raggruppa per eventId
+    final Map<String, List<BookingModel>> grouped = {};
+    for (final b in bookings) {
+      grouped.putIfAbsent(b.eventId, () => []).add(b);
+    }
+
+    // Ordina i gruppi per data evento
+    final sortedEventIds = grouped.keys.toList()
+      ..sort((a, b) {
+        final evA = _getEvent(a);
+        final evB = _getEvent(b);
+        final dateA = evA != null ? (DateTime.tryParse(evA.date) ?? DateTime(0)) : DateTime(0);
+        final dateB = evB != null ? (DateTime.tryParse(evB.date) ?? DateTime(0)) : DateTime(0);
+        return dateA.compareTo(dateB);
+      });
+
+    final widgets = <Widget>[];
+
+    for (final eventId in sortedEventIds) {
+      final ev = _getEvent(eventId);
+      final eventBookings = grouped[eventId]!;
+
+      // Separa cene e ingressi, ordinate alfabeticamente per nominativo
+      final dinners = eventBookings.where((b) => b.isDinner).toList()
+        ..sort((a, b) => a.customerName.toLowerCase().compareTo(b.customerName.toLowerCase()));
+      final entrances = eventBookings.where((b) => !b.isDinner).toList()
+        ..sort((a, b) => a.customerName.toLowerCase().compareTo(b.customerName.toLowerCase()));
+
+      // Intestazione: giorno della settimana + data + titolo evento
+      final eventDate = ev != null ? DateTime.tryParse(ev.date) : null;
+      final dateLabel = eventDate != null ? _formatDateFull(eventDate) : 'Data sconosciuta';
+
+      widgets.add(Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(dateLabel,
+                style: GoogleFonts.abrilFatface(fontSize: 19, color: Colors.black)),
+            if (ev != null)
+              Text(ev.title,
+                  style: GoogleFonts.montserrat(
+                      fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ));
+
+      // ── Cene ──────────────────────────────────────────────────────────────
+      if (dinners.isNotEmpty) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.fromLTRB(24, 2, 24, 6),
+          child: Text('🍽 CENE (${dinners.length})',
+              style: GoogleFonts.montserrat(
+                  fontSize: 11,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2)),
+        ));
+        for (final b in dinners) {
+          widgets.add(_buildCard(b, ev));
+          widgets.add(const SizedBox(height: 12));
+        }
+      }
+
+      // ── Separatore cene / ingressi ─────────────────────────────────────────
+      if (dinners.isNotEmpty && entrances.isNotEmpty) {
+        widgets.add(const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          child: Divider(color: Colors.black26, thickness: 1),
+        ));
+      }
+
+      // ── Ingressi ──────────────────────────────────────────────────────────
+      if (entrances.isNotEmpty) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.fromLTRB(24, 2, 24, 6),
+          child: Text('🎟 INGRESSI (${entrances.length})',
+              style: GoogleFonts.montserrat(
+                  fontSize: 11,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2)),
+        ));
+        for (final b in entrances) {
+          widgets.add(_buildCard(b, ev));
+          widgets.add(const SizedBox(height: 12));
+        }
+      }
+    }
+
+    return Column(children: widgets);
   }
 
   @override
@@ -227,16 +324,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
     return StreamBuilder<List<BookingModel>>(
       stream: BookingService.bookingsStream(),
       builder: (context, snapshot) {
-        final all = (snapshot.data ?? [])
-          ..sort((a, b) {
-            final evA = _getEvent(a.eventId);
-            final evB = _getEvent(b.eventId);
-            final dateA = evA != null ? (DateTime.tryParse(evA.date) ?? DateTime(0)) : DateTime(0);
-            final dateB = evB != null ? (DateTime.tryParse(evB.date) ?? DateTime(0)) : DateTime(0);
-            final dateCompare = dateA.compareTo(dateB);
-            if (dateCompare != 0) return dateCompare;
-            return a.customerName.compareTo(b.customerName);
-          });
+        final all = snapshot.data ?? [];
 
         final upcoming = all.where((b) => !_isEventPast(b.eventId)).toList();
         final past = all.where((b) => _isEventPast(b.eventId)).toList();
@@ -251,7 +339,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                 style: GoogleFonts.abrilFatface(
                     fontSize: 26,
                     fontWeight: FontWeight.w400,
-                    color: kPurple),
+                    color: Colors.black),
               ),
             ),
 
@@ -264,14 +352,14 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                     style: GoogleFonts.abrilFatface(
                         fontSize: 22,
                         fontStyle: FontStyle.italic,
-                        color: kTextMuted),
+                        color: Colors.black54),
                   ),
                 ),
               )
             else
-              _buildList(upcoming),
+              _buildGroupedList(upcoming),
 
-            // ── Archivio prenotazioni passate ─────────────────────────────────
+            // ── Archivio prenotazioni passate ──────────────────────────────────
             if (past.isNotEmpty) ...[
               const SizedBox(height: 32),
               Center(
@@ -282,14 +370,18 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                     backgroundColor: const Color(0xFF1565C0),
                     side: const BorderSide(color: Color(0xFF0D47A1)),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
-                  icon: Icon(_showArchive ? Icons.expand_less : Icons.expand_more, size: 18),
+                  icon: Icon(
+                      _showArchive ? Icons.expand_less : Icons.expand_more,
+                      size: 18),
                   label: Text(
                     _showArchive
                         ? 'Nascondi archivio'
                         : '📂 Archivio (${past.length} ${past.length == 1 ? "prenotazione passata" : "prenotazioni passate"})',
-                    style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                 ),
               ),
@@ -299,19 +391,19 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                   child: Text('PRENOTAZIONI PASSATE',
                       style: GoogleFonts.abrilFatface(
                           fontSize: 28,
-                          color: const Color(0xFF1565C0),
+                          color: Colors.black,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 3)),
                 ),
                 const SizedBox(height: 12),
                 const Divider(
-                  color: Color(0xFF1565C0),
+                  color: Colors.black26,
                   thickness: 2,
                   indent: 24,
                   endIndent: 24,
                 ),
                 const SizedBox(height: 24),
-                _buildList(past),
+                _buildGroupedList(past),
               ],
             ],
 
