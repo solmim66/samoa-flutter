@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -25,7 +25,7 @@ class SamoaApp extends StatelessWidget {
         title: 'Samoa Village',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
-        home: const HomeScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
