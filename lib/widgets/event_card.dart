@@ -69,76 +69,29 @@ class _EventCardState extends State<EventCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header (immagine o gradiente) ─────────────────────────────
+            // ── Zona titolo (sempre su gradiente, mai sull'immagine) ──────
             Container(
               width: double.infinity,
-              constraints: const BoxConstraints(minHeight: 160),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               decoration: BoxDecoration(
-                gradient: event.imageUrl.isEmpty
-                    ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: gradient,
-                      )
-                    : null,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: gradient,
+                ),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               ),
-              child: Stack(
-                children: [
-                  if (event.imageUrl.isNotEmpty)
-                    ClipRRect(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.network(
-                        event.imageUrl,
-                        width: double.infinity,
-                        height: 160,
-                        fit: BoxFit.cover,
-                        errorBuilder: (ctx, err, st) => Container(
-                          height: 160,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: gradient,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (event.imageUrl.isNotEmpty)
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withValues(alpha: 0.7),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tags
-                  if (event.tags.isNotEmpty)
+                  if (event.tags.isNotEmpty) ...[
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
                       children: event.tags.map((tag) => Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(tag.toUpperCase(),
@@ -146,29 +99,35 @@ class _EventCardState extends State<EventCard> {
                                 fontSize: 10, color: Colors.white, letterSpacing: 1)),
                       )).toList(),
                     ),
-                  if (event.tags.isNotEmpty) const SizedBox(height: 10),
+                    const SizedBox(height: 10),
+                  ],
                   Text('${event.day} — ${_formatDate(event.date)}',
                       style: GoogleFonts.montserrat(
-                          fontSize: 11,
-                          color: Colors.white,
-                          letterSpacing: 2)),
+                          fontSize: 11, color: Colors.white70, letterSpacing: 2)),
                   const SizedBox(height: 6),
                   Text(event.title,
                       style: GoogleFonts.abrilFatface(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w300,
-                          color: Colors.white,
-                          height: 1.2)),
+                          fontSize: 26, fontWeight: FontWeight.w300,
+                          color: Colors.white, height: 1.2)),
                   const SizedBox(height: 6),
                   Text('🎵 ${event.dj}  ·  🕘 ${event.time}',
                       style: GoogleFonts.montserrat(
-                          fontSize: 12, color: Colors.white)),
-                ],
-              ),
-                  ),
+                          fontSize: 12, color: Colors.white70)),
                 ],
               ),
             ),
+
+            // ── Immagine (sotto il titolo, solo se presente) ──────────────
+            if (event.imageUrl.isNotEmpty)
+              ClipRRect(
+                child: Image.network(
+                  event.imageUrl,
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, st) => const SizedBox.shrink(),
+                ),
+              ),
 
             // ── Body ─────────────────────────────────────────────────────────
             Padding(

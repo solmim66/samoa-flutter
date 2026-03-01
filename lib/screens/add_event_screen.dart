@@ -39,6 +39,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
     'Venerdì', 'Sabato', 'Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'
   ];
 
+  static const _weekdayNames = {
+    1: 'Lunedì', 2: 'Martedì', 3: 'Mercoledì', 4: 'Giovedì',
+    5: 'Venerdì', 6: 'Sabato', 7: 'Domenica',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -110,7 +115,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
         child: child!,
       ),
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    if (picked != null) {
+      final dayName = _weekdayNames[picked.weekday] ?? _selectedDay;
+      setState(() {
+        _selectedDate = picked;
+        _selectedDay = dayName;
+      });
+      _updatePricesForDay(dayName);
+    }
   }
 
   String _formatDate(DateTime d) =>
