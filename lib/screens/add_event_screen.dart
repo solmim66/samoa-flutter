@@ -186,7 +186,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
       final ref = FirebaseStorage.instance.ref('events/images/$fileName');
       final task = ref.putData(
         bytes,
-        SettableMetadata(contentType: 'image/${file.extension ?? 'jpeg'}'),
+        SettableMetadata(contentType: 'image/${file.extension?.toLowerCase() == 'jpg' ? 'jpeg' : (file.extension?.toLowerCase() ?? 'jpeg')}'),
       );
       task.snapshotEvents.listen((snap) {
         if (mounted && snap.totalBytes > 0) {
