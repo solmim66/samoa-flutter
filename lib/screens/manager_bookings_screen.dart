@@ -277,7 +277,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
       if (dinners.isNotEmpty) {
         widgets.add(Padding(
           padding: const EdgeInsets.fromLTRB(24, 2, 24, 6),
-          child: Text('🍽 CENE (${dinners.length})',
+          child: Text('🍽 CENE — ${dinners.where((b) => b.status != "cancellata").length} ${dinners.where((b) => b.status != "cancellata").length == 1 ? "prenotazione" : "prenotazioni"} · ${dinners.where((b) => b.status != "cancellata").fold(0, (s, b) => s + b.guests)} persone',
               style: GoogleFonts.montserrat(
                   fontSize: 11,
                   color: Colors.black54,
@@ -302,7 +302,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
       if (entrances.isNotEmpty) {
         widgets.add(Padding(
           padding: const EdgeInsets.fromLTRB(24, 2, 24, 6),
-          child: Text('🎟 INGRESSI (${entrances.length})',
+          child: Text('🎟 INGRESSI — ${entrances.where((b) => b.status != "cancellata").length} ${entrances.where((b) => b.status != "cancellata").length == 1 ? "prenotazione" : "prenotazioni"} · ${entrances.where((b) => b.status != "cancellata").fold(0, (s, b) => s + b.guests)} persone',
               style: GoogleFonts.montserrat(
                   fontSize: 11,
                   color: Colors.black54,
