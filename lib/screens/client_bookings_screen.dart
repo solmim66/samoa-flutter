@@ -206,7 +206,7 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: bookings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (context, i) => const SizedBox(height: 12),
       itemBuilder: (_, i) => _buildCard(bookings[i], canEdit: canEdit),
     );
   }

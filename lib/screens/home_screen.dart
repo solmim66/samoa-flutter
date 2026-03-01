@@ -309,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         return d != null && d.isBefore(todayDate);
                       }).toList();
 
-                      Widget _buildGrid(List<EventModel> events, {bool isPast = false}) {
+                      Widget buildGrid(List<EventModel> events, {bool isPast = false}) {
                         return LayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.maxWidth;
@@ -368,7 +368,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               )
                             else
-                              _buildGrid(upcoming),
+                              buildGrid(upcoming),
 
                             if (past.isNotEmpty) ...[
                               const SizedBox(height: 32),
@@ -405,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(height: 12),
                                 const Divider(color: Color(0xFF1565C0), thickness: 2),
                                 const SizedBox(height: 24),
-                                _buildGrid(past, isPast: true),
+                                buildGrid(past, isPast: true),
                               ],
                             ],
                           ],
