@@ -4,8 +4,10 @@ workflows:
     max_build_duration: 30
     environment:
       flutter: stable
-      xcode: latest
-      cocoapods: default
+      vars:
+        FIREBASE_PROJECT_ID: samoa-439f8
+      groups:
+        - firebase_credentials   # gruppo in Codemagic con FIREBASE_TOKEN
 
     triggering:
       events:
@@ -24,8 +26,18 @@ workflows:
       - name: Build web (release)
         script: flutter build web --release --web-renderer canvaskit
 
+      - name: Installa Firebase CLI
+        script: npm install -g firebase-tools
+
+      - name: Deploy su Firebase Hosting
+        script: |
+          firebase deploy --only hosting \
+            --project "$FIREBASE_PROJECT_ID" \
+            --token "$FIREBASE_TOKEN" \
+            --non-interactive
+
     artifacts:
-      - build/web.zip
+      - build/web/**
 
     publishing:
       email:

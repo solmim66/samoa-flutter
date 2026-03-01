@@ -1,1 +1,51 @@
-{"storage": {"rules": "storage.rules"}, "flutter":{"platforms":{"android":{"default":{"projectId":"samoa-439f8","appId":"1:878255446461:android:e5b8c8c83611fb27a7dad4","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"samoa-439f8","configurations":{"android":"1:878255446461:android:e5b8c8c83611fb27a7dad4","ios":"1:878255446461:ios:9e4350f8def99201a7dad4","web":"1:878255446461:web:5cf5e64700b5436ca7dad4"}}}}}}
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "samoa-439f8",
+          "appId": "1:878255446461:android:e5b8c8c83611fb27a7dad4",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "samoa-439f8",
+          "configurations": {
+            "android": "1:878255446461:android:e5b8c8c83611fb27a7dad4",
+            "ios": "1:878255446461:ios:9e4350f8def99201a7dad4",
+            "web": "1:878255446461:web:5cf5e64700b5436ca7dad4"
+          }
+        }
+      }
+    }
+  }
+}
