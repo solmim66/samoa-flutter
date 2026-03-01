@@ -300,48 +300,64 @@ class _HomeScreenState extends State<HomeScreen> {
                       final allEvents = snapshot.data ?? [];
                       final today = DateTime.now();
                       final todayDate = DateTime(today.year, today.month, today.day);
+                      int byDate(EventModel a, EventModel b) {
+                        final da = DateTime.tryParse(a.date);
+                        final db = DateTime.tryParse(b.date);
+                        if (da == null && db == null) return 0;
+                        if (da == null) return 1;
+                        if (db == null) return -1;
+                        return da.compareTo(db);
+                      }
+
                       final upcoming = allEvents.where((e) {
                         final d = DateTime.tryParse(e.date);
                         return d == null || !d.isBefore(todayDate);
-                      }).toList();
+                      }).toList()..sort(byDate);
                       final past = allEvents.where((e) {
                         final d = DateTime.tryParse(e.date);
                         return d != null && d.isBefore(todayDate);
-                      }).toList();
+                      }).toList()..sort(byDate);
 
                       Widget buildGrid(List<EventModel> events, {bool isPast = false}) {
                         return LayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.maxWidth;
                             final cols = width < 600 ? 1 : width < 900 ? 2 : 3;
-                            return GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: cols,
-                                crossAxisSpacing: 24,
-                                mainAxisSpacing: 24,
-                                childAspectRatio: 0.72,
-                              ),
-                              itemCount: events.length,
-                              itemBuilder: (context, i) {
-                                final event = events[i];
-                                return EventCard(
-                                  event: event,
-                                  isManager: auth.isManager,
-                                  isPast: isPast,
-                                  onBook: () {
-                                    if (!auth.isLoggedIn) {
-                                      _showLogin();
-                                    } else {
-                                      _showBooking(event, auth.currentUser!);
-                                    }
-                                  },
-                                  onDelete: () => _confirmDelete(event),
-                                  onEdit: () => _showEditEvent(event),
-                                );
+
+                            Widget cardFor(EventModel event) => EventCard(
+                              event: event,
+                              isManager: auth.isManager,
+                              isPast: isPast,
+                              onBook: () {
+                                if (!auth.isLoggedIn) {
+                                  _showLogin();
+                                } else {
+                                  _showBooking(event, auth.currentUser!);
+                                }
                               },
+                              onDelete: () => _confirmDelete(event),
+                              onEdit: () => _showEditEvent(event),
                             );
+
+                            final rows = <Widget>[];
+                            for (int i = 0; i < events.length; i += cols) {
+                              final rowEvents = events.skip(i).take(cols).toList();
+                              final rowChildren = <Widget>[];
+                              for (int j = 0; j < rowEvents.length; j++) {
+                                if (j > 0) rowChildren.add(const SizedBox(width: 24));
+                                rowChildren.add(Expanded(child: cardFor(rowEvents[j])));
+                              }
+                              for (int j = rowEvents.length; j < cols; j++) {
+                                rowChildren.add(const SizedBox(width: 24));
+                                rowChildren.add(const Expanded(child: SizedBox.shrink()));
+                              }
+                              if (rows.isNotEmpty) rows.add(const SizedBox(height: 24));
+                              rows.add(Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: rowChildren,
+                              ));
+                            }
+                            return Column(children: rows);
                           },
                         );
                       }
