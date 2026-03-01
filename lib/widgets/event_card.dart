@@ -55,6 +55,7 @@ class _EventCardState extends State<EventCard> {
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: kCard,
           border: Border.all(color: kCardBorder),
@@ -67,6 +68,7 @@ class _EventCardState extends State<EventCard> {
             ? (Matrix4.identity()..translateByDouble(0.0, -4.0, 0.0, 1.0))
             : Matrix4.identity(),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Zona titolo (sempre su gradiente, mai sull'immagine) ──────
@@ -195,9 +197,10 @@ class _EventCardState extends State<EventCard> {
                       ),
                     )
                   else
-                    Row(
+                    Column(
                       children: [
-                        Expanded(
+                        SizedBox(
+                          width: double.infinity,
                           child: OutlinedButton(
                             onPressed: widget.onEdit,
                             style: OutlinedButton.styleFrom(
@@ -211,8 +214,9 @@ class _EventCardState extends State<EventCard> {
                                 style: GoogleFonts.montserrat(fontSize: 13)),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
                           child: OutlinedButton(
                             onPressed: widget.onDelete,
                             style: OutlinedButton.styleFrom(

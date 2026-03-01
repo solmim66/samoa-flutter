@@ -149,69 +149,91 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             actions: [
-              if (auth.isManager) ...[
-                _NavBtn(
-                    label: '🗓 Eventi',
-                    active: _tab == _Tab.events,
-                    onTap: () => setState(() => _tab = _Tab.events)),
-                _NavBtn(
-                    label: '📋 Prenotazioni',
-                    active: _tab == _Tab.bookings,
-                    onTap: () => setState(() => _tab = _Tab.bookings)),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ElevatedButton(
-                    onPressed: _showAddEvent,
-                    style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 9)),
-                    child: Text('+ Nuovo Evento',
-                        style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ),
-                ),
-              ] else if (auth.isLoggedIn) ...[
-                _NavBtn(
-                    label: '🗓 Eventi',
-                    active: _tab == _Tab.events,
-                    onTap: () => setState(() => _tab = _Tab.events)),
-                _NavBtn(
-                    label: '🎟 Le mie prenotazioni',
-                    active: _tab == _Tab.myBookings,
-                    onTap: () => setState(() => _tab = _Tab.myBookings)),
-              ],
               if (auth.isLoggedIn)
                 Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Row(children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(auth.currentUser!.name,
+                  padding: const EdgeInsets.only(right: 12),
+                  child: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'eventi':
+                          setState(() => _tab = _Tab.events);
+                        case 'prenotazioni':
+                          setState(() => _tab = _Tab.bookings);
+                        case 'mie':
+                          setState(() => _tab = _Tab.myBookings);
+                        case 'nuovo':
+                          _showAddEvent();
+                        case 'esci':
+                          AuthService.signOut();
+                      }
+                    },
+                    color: const Color(0xFF1A1020),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: Color(0xFF2E1E3A))),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'eventi',
+                        child: Text('🗓  Eventi',
                             style: GoogleFonts.montserrat(
-                                fontSize: 12,
-                                color: Colors.white,
+                                fontSize: 13, color: Colors.white)),
+                      ),
+                      if (auth.isManager) ...[
+                        PopupMenuItem(
+                          value: 'prenotazioni',
+                          child: Text('📋  Prenotazioni',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 13, color: Colors.white)),
+                        ),
+                        const PopupMenuDivider(),
+                        PopupMenuItem(
+                          value: 'nuovo',
+                          child: Text('＋  Nuovo Evento',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 13, color: Colors.white)),
+                        ),
+                      ] else ...[
+                        PopupMenuItem(
+                          value: 'mie',
+                          child: Text('🎟  Le mie prenotazioni',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 13, color: Colors.white)),
+                        ),
+                      ],
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'esci',
+                        child: Text('Esci',
+                            style: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                color: const Color(0xFFCC4444),
                                 fontWeight: FontWeight.w700)),
-                        Text(auth.isManager ? '🔑 Gestore' : '🎟 Cliente',
-                            style: GoogleFonts.montserrat(
-                                fontSize: 10, color: Colors.white,
-                                fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(auth.currentUser!.name,
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700)),
+                            Text(auth.isManager ? '🔑 Gestore' : '🎟 Cliente',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        const Icon(Icons.arrow_drop_down,
+                            color: Colors.white, size: 22),
                       ],
                     ),
-                    const SizedBox(width: 10),
-                    OutlinedButton(
-                      onPressed: AuthService.signOut,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white54),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 7),
-                      ),
-                      child: Text('Esci',
-                          style: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w700)),
-                    ),
-                  ]),
+                  ),
                 )
               else
                 Padding(
@@ -225,7 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           horizontal: 20, vertical: 9),
                     ),
                     child: Text('Accedi',
-                        style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700)),
+                        style: GoogleFonts.montserrat(
+                            fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ),
             ],
@@ -453,30 +476,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _NavBtn extends StatelessWidget {
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _NavBtn(
-      {required this.label, required this.active, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: TextButton(
-        onPressed: onTap,
-        style: TextButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor:
-              active ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-        child: Text(label, style: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w700)),
-      ),
-    );
-  }
-}

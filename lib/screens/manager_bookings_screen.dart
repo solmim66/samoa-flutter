@@ -153,7 +153,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                       children: [
                         if (b.status != 'presente') ...[
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: ElevatedButton(
                               onPressed: () => BookingService.confirmArrival(b.id),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF00C853),
@@ -162,8 +162,8 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
                               ),
-                              icon: const Icon(Icons.how_to_reg, size: 14),
-                              label: Text('Conferma Arrivo',
+                              child: Text('Conferma\nArrivo',
+                                  textAlign: TextAlign.center,
                                   style: GoogleFonts.montserrat(
                                       fontSize: 11, fontWeight: FontWeight.w700)),
                             ),
@@ -182,7 +182,8 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: Text('✏ Modifica',
+                            child: Text('Modifica',
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                     fontSize: 11, fontWeight: FontWeight.w700)),
                           ),
@@ -198,7 +199,8 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: Text('🗑 Cancella',
+                            child: Text('Cancella',
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                     fontSize: 11, fontWeight: FontWeight.w700)),
                           ),
@@ -335,7 +337,7 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                '📬 Prenotazioni Ricevute (${upcoming.length})',
+                'Prenotazioni Ricevute',
                 style: GoogleFonts.abrilFatface(
                     fontSize: 26,
                     fontWeight: FontWeight.w400,
@@ -388,12 +390,12 @@ class _ManagerBookingsScreenState extends State<ManagerBookingsScreen> {
               if (_showArchive) ...[
                 const SizedBox(height: 32),
                 Center(
-                  child: Text('PRENOTAZIONI PASSATE',
+                  child: Text('Prenotazioni passate',
                       style: GoogleFonts.abrilFatface(
-                          fontSize: 28,
+                          fontSize: 20,
                           color: Colors.black,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 3)),
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 1)),
                 ),
                 const SizedBox(height: 12),
                 const Divider(
