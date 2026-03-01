@@ -1,0 +1,36 @@
+workflows:
+  flutter-web:
+    name: Flutter Web — Build & Deploy
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    scripts:
+      - name: Installa dipendenze
+        script: flutter pub get
+
+      - name: Analisi statica
+        script: flutter analyze --no-fatal-warnings
+
+      - name: Build web (release)
+        script: flutter build web --release --web-renderer canvaskit
+
+    artifacts:
+      - build/web.zip
+
+    publishing:
+      email:
+        recipients:
+          - placeholder@email.com   # <-- sostituisci con la tua email
+        notify:
+          success: true
+          failure: true
