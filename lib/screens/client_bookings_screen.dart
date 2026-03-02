@@ -160,32 +160,32 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: ElevatedButton(
                         onPressed: ev != null ? () => _editBooking(ctx, b, ev) : null,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFD4A853),
-                          side: const BorderSide(color: Color(0xFF5A4000)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFDD835),
+                          foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        child: Text('✏ Modifica',
+                        child: Text('Modifica',
                             style: GoogleFonts.montserrat(
                                 fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: OutlinedButton(
+                      child: ElevatedButton(
                         onPressed: () => _cancelBooking(ctx, b),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFCC4444),
-                          side: const BorderSide(color: Color(0xFF4A1A1A)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFCC4444),
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        child: Text('🗑 Cancella',
+                        child: Text('Cancella',
                             style: GoogleFonts.montserrat(
                                 fontSize: 12, fontWeight: FontWeight.w700)),
                       ),

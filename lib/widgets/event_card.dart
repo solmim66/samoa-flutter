@@ -201,33 +201,35 @@ class _EventCardState extends State<EventCard> {
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton(
+                          child: ElevatedButton(
                             onPressed: widget.onEdit,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFFD4A853),
-                              side: const BorderSide(color: Color(0xFF5A4000)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFDD835),
+                              foregroundColor: Colors.black,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: Text('✏ Modifica',
-                                style: GoogleFonts.montserrat(fontSize: 13)),
+                            child: Text('Modifica',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 13, fontWeight: FontWeight.w700)),
                           ),
                         ),
                         const SizedBox(height: 8),
                         SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton(
+                          child: ElevatedButton(
                             onPressed: widget.onDelete,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFFCC4444),
-                              side: const BorderSide(color: Color(0xFF4A1A1A)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFCC4444),
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: Text('🗑 Elimina',
-                                style: GoogleFonts.montserrat(fontSize: 13)),
+                            child: Text('Elimina',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 13, fontWeight: FontWeight.w700)),
                           ),
                         ),
                       ],

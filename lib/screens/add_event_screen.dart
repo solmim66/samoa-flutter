@@ -187,7 +187,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(isEdit ? 'Evento aggiornato! ✓' : 'Evento pubblicato! ✨'),
-          backgroundColor: const Color(0xFF1A3A1A),
+          backgroundColor: const Color(0xFF0A1E5E),
         ));
       }
     } catch (e) {
@@ -243,16 +243,16 @@ class _AddEventScreenState extends State<AddEventScreen> {
       style: GoogleFonts.montserrat(fontSize: 13, color: Colors.black),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.montserrat(fontSize: 13, color: const Color(0xFF558B2F)),
+        hintStyle: GoogleFonts.montserrat(fontSize: 13, color: const Color(0xFF5A7AC0)),
         filled: true,
-        fillColor: const Color(0xFFE8F5E9),
+        fillColor: const Color(0xFFE8EEF9),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+          borderSide: const BorderSide(color: Color(0xFF1565C0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+          borderSide: const BorderSide(color: Color(0xFF1565C0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -268,8 +268,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
         child: Text(text,
             style: GoogleFonts.montserrat(
                 fontSize: 11,
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 1)),
       );
 
@@ -278,10 +278,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
     final previewUrl = _imageUrlCtrl.text.trim();
 
     return Dialog(
-      backgroundColor: const Color(0xFF4CAF50),
+      backgroundColor: const Color(0xFF0D2B6B),
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF2E7D32))),
+          side: const BorderSide(color: Color(0xFF1A4A9A))),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: SingleChildScrollView(
@@ -292,8 +292,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
             children: [
               Text(widget.event != null ? 'Modifica Evento' : 'Pubblica Nuovo Evento',
                   style: GoogleFonts.abrilFatface(
-                      fontSize: 26, fontWeight: FontWeight.w300, color: Colors.black)),
-              const Divider(color: Color(0xFF2E7D32)),
+                      fontSize: 26, fontWeight: FontWeight.w700, color: Colors.white)),
+              const Divider(color: Color(0xFF1A4A9A)),
               const SizedBox(height: 16),
 
               // Titolo
@@ -313,8 +313,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8F5E9),
-                          border: Border.all(color: const Color(0xFF2E7D32)),
+                          color: const Color(0xFFE8EEF9),
+                          border: Border.all(color: const Color(0xFF1565C0)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -325,7 +325,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                               fontSize: 13,
                               color: _selectedDate != null
                                   ? Colors.black
-                                  : const Color(0xFF558B2F)),
+                                  : const Color(0xFF5A7AC0)),
                         ),
                       ),
                     ),
@@ -338,7 +338,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     _label('Giorno'),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedDay,
-                      dropdownColor: const Color(0xFFE8F5E9),
+                      dropdownColor: const Color(0xFFE8EEF9),
                       style: GoogleFonts.montserrat(
                           fontSize: 13, color: Colors.black),
                       decoration: const InputDecoration(),
@@ -374,22 +374,31 @@ class _AddEventScreenState extends State<AddEventScreen> {
               ]),
               const SizedBox(height: 14),
 
-              // Prezzi e posti
-              Row(children: [
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Prezzo\nIngresso'), _field('€. 8', _entrancePriceCtrl)])),
-                const SizedBox(width: 8),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Prezzo\nCena'), _field('€. 18', _dinnerPriceCtrl)])),
-                const SizedBox(width: 8),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Posti\nCena'),
-                      _field('150', _dinnerSeatsCtrl, type: TextInputType.number)])),
-                const SizedBox(width: 8),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Posti\nTot.'),
-                      _field('300', _totalSeatsCtrl, type: TextInputType.number)])),
-              ]),
+              // Prezzi e posti — responsive
+              LayoutBuilder(builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 500;
+                Widget priceIngresso = Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_label('Prezzo Ingresso'), _field('€. 8', _entrancePriceCtrl)]);
+                Widget priceCena = Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_label('Prezzo Cena'), _field('€. 18', _dinnerPriceCtrl)]);
+                Widget postiCena = Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_label('Posti Cena'), _field('150', _dinnerSeatsCtrl, type: TextInputType.number)]);
+                Widget postiTot = Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_label('Posti Tot.'), _field('300', _totalSeatsCtrl, type: TextInputType.number)]);
+                if (wide) {
+                  return Row(children: [
+                    Expanded(child: priceIngresso), const SizedBox(width: 8),
+                    Expanded(child: priceCena), const SizedBox(width: 8),
+                    Expanded(child: postiCena), const SizedBox(width: 8),
+                    Expanded(child: postiTot),
+                  ]);
+                }
+                return Column(children: [
+                  Row(children: [Expanded(child: priceIngresso), const SizedBox(width: 8), Expanded(child: priceCena)]),
+                  const SizedBox(height: 10),
+                  Row(children: [Expanded(child: postiCena), const SizedBox(width: 8), Expanded(child: postiTot)]),
+                ]);
+              }),
               const SizedBox(height: 14),
 
               // Tag
@@ -408,9 +417,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _uploading ? null : _pickAndUploadImage,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        side: const BorderSide(color: Color(0xFF2E7D32)),
-                        backgroundColor: const Color(0xFFE8F5E9),
+                        foregroundColor: const Color(0xFF0D2B6B),
+                        side: const BorderSide(color: Color(0xFF1565C0)),
+                        backgroundColor: const Color(0xFFE8EEF9),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
@@ -440,16 +449,16 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     decoration: InputDecoration(
                       hintText: 'oppure incolla un URL…',
                       hintStyle: GoogleFonts.montserrat(
-                          fontSize: 13, color: const Color(0xFF558B2F)),
+                          fontSize: 13, color: const Color(0xFF5A7AC0)),
                       filled: true,
-                      fillColor: const Color(0xFFE8F5E9),
+                      fillColor: const Color(0xFFE8EEF9),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+                        borderSide: const BorderSide(color: Color(0xFF1565C0)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+                        borderSide: const BorderSide(color: Color(0xFF1565C0)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -473,7 +482,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (ctx, err, st) => Container(
                           height: 120,
-                          color: const Color(0xFFE8F5E9),
+                          color: const Color(0xFFE8EEF9),
                           alignment: Alignment.center,
                           child: Text('URL non valido',
                               style: GoogleFonts.montserrat(
@@ -519,14 +528,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      side: const BorderSide(color: Color(0xFF2E7D32)),
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFF5A8AE0)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
                     ),
                     child: Text('Annulla',
-                        style: GoogleFonts.montserrat(fontSize: 13)),
+                        style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ),
                 const SizedBox(width: 10),
