@@ -242,9 +242,9 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                '🎟 Le mie prenotazioni (${upcoming.length})',
+                'Le mie prenotazioni',
                 style: GoogleFonts.abrilFatface(
-                    fontSize: 26, fontWeight: FontWeight.w400, color: kPurple),
+                    fontSize: 26, fontWeight: FontWeight.w400, color: Colors.black),
               ),
             ),
 
@@ -297,12 +297,12 @@ class _ClientBookingsScreenState extends State<ClientBookingsScreen> {
               if (_showArchive) ...[
                 const SizedBox(height: 32),
                 Center(
-                  child: Text('PRENOTAZIONI PASSATE',
+                  child: Text('Prenotazioni Passate',
                       style: GoogleFonts.abrilFatface(
-                          fontSize: 28,
-                          color: const Color(0xFF1565C0),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 3)),
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 1)),
                 ),
                 const SizedBox(height: 12),
                 const Divider(

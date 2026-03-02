@@ -12,6 +12,7 @@ import 'booking_screen.dart';
 import 'client_bookings_screen.dart';
 import 'login_screen.dart';
 import 'manager_bookings_screen.dart';
+import 'price_settings_screen.dart';
 
 enum _Tab { events, bookings, myBookings }
 
@@ -42,6 +43,12 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
         context: context,
         builder: (_) => const AddEventScreen());
+  }
+
+  void _showPriceSettings() {
+    showDialog(
+        context: context,
+        builder: (_) => const PriceSettingsScreen());
   }
 
   void _showEditEvent(EventModel event) {
@@ -163,6 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           setState(() => _tab = _Tab.myBookings);
                         case 'nuovo':
                           _showAddEvent();
+                        case 'prezzi':
+                          _showPriceSettings();
                         case 'esci':
                           AuthService.signOut();
                       }
@@ -189,6 +198,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         PopupMenuItem(
                           value: 'nuovo',
                           child: Text('＋  Nuovo Evento',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 13, color: Colors.white)),
+                        ),
+                        PopupMenuItem(
+                          value: 'prezzi',
+                          child: Text('⚙  Impostazioni Prezzi',
                               style: GoogleFonts.montserrat(
                                   fontSize: 13, color: Colors.white)),
                         ),

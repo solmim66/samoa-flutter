@@ -3,7 +3,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/event_model.dart';
+import '../models/price_settings_model.dart';
 import '../services/event_service.dart';
+import '../services/price_settings_service.dart';
 import '../theme/app_theme.dart';
 
 class AddEventScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
   String _selectedColor = '#4A1A6B';
   String _selectedDay = 'Venerdì';
   DateTime? _selectedDate;
+  PriceSettings _prices = PriceSettings.defaults;
 
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
@@ -63,16 +66,30 @@ class _AddEventScreenState extends State<AddEventScreen> {
       _selectedColor = e.color;
       _selectedDay = e.day;
       _selectedDate = DateTime.tryParse(e.date);
+    } else {
+      _loadPrices();
     }
+  }
+
+  Future<void> _loadPrices() async {
+    final prices = await PriceSettingsService.load();
+    if (!mounted) return;
+    setState(() {
+      _prices = prices;
+      _updatePricesForDay(_selectedDay);
+    });
   }
 
   void _updatePricesForDay(String day) {
     if (day == 'Sabato') {
-      _entrancePriceCtrl.text = '€. 10';
-      _dinnerPriceCtrl.text = '€. 20';
+      _entrancePriceCtrl.text = _prices.saturdayEntrance;
+      _dinnerPriceCtrl.text = _prices.saturdayDinner;
     } else if (day == 'Venerdì') {
-      _entrancePriceCtrl.text = '€. 8';
-      _dinnerPriceCtrl.text = '€. 18';
+      _entrancePriceCtrl.text = _prices.fridayEntrance;
+      _dinnerPriceCtrl.text = _prices.fridayDinner;
+    } else {
+      _entrancePriceCtrl.text = _prices.otherEntrance;
+      _dinnerPriceCtrl.text = _prices.otherDinner;
     }
   }
 
@@ -360,17 +377,17 @@ class _AddEventScreenState extends State<AddEventScreen> {
               // Prezzi e posti
               Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Ingresso'), _field('€. 8', _entrancePriceCtrl)])),
+                    children: [_label('Prezzo\nIngresso'), _field('€. 8', _entrancePriceCtrl)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Cena'), _field('€. 18', _dinnerPriceCtrl)])),
+                    children: [_label('Prezzo\nCena'), _field('€. 18', _dinnerPriceCtrl)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Posti Cena'),
+                    children: [_label('Posti\nCena'),
                       _field('150', _dinnerSeatsCtrl, type: TextInputType.number)])),
                 const SizedBox(width: 8),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_label('Posti Tot.'),
+                    children: [_label('Posti\nTot.'),
                       _field('300', _totalSeatsCtrl, type: TextInputType.number)])),
               ]),
               const SizedBox(height: 14),
