@@ -14,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isRegister = false;
   bool _loading = false;
+  String? _errorMessage;
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
@@ -30,9 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _notify(String msg) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: kError),
-    );
+    setState(() => _errorMessage = msg);
   }
 
   Future<void> _handleGoogle() async {
@@ -184,6 +183,25 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
+              // ── Messaggio di errore inline ────────────────────────────────
+              if (_errorMessage != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5C1010),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: kError),
+                  ),
+                  child: Text(
+                    _errorMessage!,
+                    style: GoogleFonts.montserrat(
+                        color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+
               // ── Pulsante submit ───────────────────────────────────────────
               SizedBox(
                 width: double.infinity,
@@ -215,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => setState(() => _isRegister = !_isRegister),
+                  onPressed: () => setState(() { _isRegister = !_isRegister; _errorMessage = null; }),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.white54),
