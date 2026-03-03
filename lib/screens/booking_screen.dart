@@ -4,6 +4,7 @@ import '../models/booking_model.dart';
 import '../models/event_model.dart';
 import '../providers/auth_provider.dart';
 import '../services/booking_service.dart';
+import '../services/email_service.dart';
 import '../services/event_service.dart';
 import '../theme/app_theme.dart';
 
@@ -99,6 +100,18 @@ class _BookingScreenState extends State<BookingScreen> {
           guests: _guests,
           isDinner: _option == 'dinner',
         );
+        // Invia email di conferma (fire-and-forget, non blocca il flusso)
+        EmailService.sendBookingConfirmation(
+          toName:    widget.user.name,
+          toEmail:   widget.user.email,
+          eventName: widget.event.title,
+          eventDay:  widget.event.day,
+          eventDate: _formatDate(widget.event.date),
+          option:    _option,
+          guests:    _guests,
+          total:     _total,
+          notes:     _notesCtrl.text.trim(),
+        ).catchError((_) {}); // ignora errori email, non blocca la prenotazione
       }
 
       if (mounted) {
