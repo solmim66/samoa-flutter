@@ -57,8 +57,16 @@ class _LoginScreenState extends State<LoginScreen> {
         _notify('Inserisci un numero di cellulare valido.');
         return;
       }
+      setState(() => _loading = true);
+      final phoneExists = await AuthService.isPhoneAlreadyRegistered(phone);
+      if (phoneExists) {
+        if (mounted) setState(() => _loading = false);
+        _notify('Numero di cellulare già registrato.');
+        return;
+      }
+    } else {
+      setState(() => _loading = true);
     }
-    setState(() => _loading = true);
     try {
       if (_isRegister) {
         await AuthService.registerWithEmail(

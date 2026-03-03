@@ -11,6 +11,15 @@ class AuthService {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
+  static Future<bool> isPhoneAlreadyRegistered(String phone) async {
+    final snap = await FirebaseFirestore.instance
+        .collection('users')
+        .where('phone', isEqualTo: phone)
+        .limit(1)
+        .get();
+    return snap.docs.isNotEmpty;
+  }
+
   static Future<UserCredential> registerWithEmail(
       String email, String password, String name, String phone) async {
     final cred = await _auth.createUserWithEmailAndPassword(
