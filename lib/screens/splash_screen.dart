@@ -47,10 +47,16 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+          Center(
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.contain,
+            ),
+          ),
           AnimatedBuilder(
             animation: _overlayOpacity,
             builder: (context, child) => ColoredBox(

@@ -102,9 +102,13 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // ── Sfondo logo con sfumatura intensissima ──────────────────────────
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.cover,
+            child: ColoredBox(color: Colors.white,
+              child: Center(
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
           Positioned.fill(
