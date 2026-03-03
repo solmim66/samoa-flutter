@@ -42,6 +42,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
     'Venerdì', 'Sabato', 'Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'
   ];
 
+  static const _descSabato =
+      'ingresso + consumazione\n'
+      'ingresso + cena (antipasto samoa, primo del giorno o pizza, acqua e vino';
+  static const _descAltri =
+      'ingresso + consumazione (analcolica)\n'
+      'ingresso + cena (antipasto samoa, primo del giorno o pizza, acqua e vino';
+
   static const _weekdayNames = {
     1: 'Lunedì', 2: 'Martedì', 3: 'Mercoledì', 4: 'Giovedì',
     5: 'Venerdì', 6: 'Sabato', 7: 'Domenica',
@@ -90,6 +97,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
     } else {
       _entrancePriceCtrl.text = _prices.otherEntrance;
       _dinnerPriceCtrl.text = _prices.otherDinner;
+    }
+
+    // Auto-compila la descrizione solo in modalità creazione
+    // e solo se il campo è vuoto o contiene una descrizione default
+    if (widget.event == null) {
+      final current = _descCtrl.text;
+      if (current.isEmpty || current == _descSabato || current == _descAltri) {
+        _descCtrl.text = day == 'Sabato' ? _descSabato : _descAltri;
+      }
     }
   }
 
