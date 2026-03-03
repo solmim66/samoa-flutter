@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class EmailService {
   // ── Configura questi valori dopo aver creato l'account EmailJS ────────────
-  static const _serviceId  = 'service_7luicbr';
+  static const _serviceId  = 'service_0782ncn';
   static const _templateId = 'template_0sgawk9';
   static const _publicKey  = 'ayYRb1YrRS4Moq2zJ';
   // ─────────────────────────────────────────────────────────────────────────
