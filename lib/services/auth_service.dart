@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,10 +12,15 @@ class AuthService {
   }
 
   static Future<UserCredential> registerWithEmail(
-      String email, String password, String name) async {
+      String email, String password, String name, String phone) async {
     final cred = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
-    await cred.user?.updateDisplayName(name.isNotEmpty ? name : email.split('@')[0]);
+    final displayName = name.isNotEmpty ? name : email.split('@')[0];
+    await cred.user?.updateDisplayName(displayName);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(cred.user!.uid)
+        .set({'name': displayName, 'email': email, 'phone': phone});
     return cred;
   }
 

@@ -17,12 +17,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     _nameCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -48,11 +50,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleSubmit() async {
     if (_emailCtrl.text.isEmpty || _passwordCtrl.text.isEmpty) return;
+    if (_isRegister) {
+      final phone = _phoneCtrl.text.trim();
+      final digits = phone.replaceAll(RegExp(r'\D'), '');
+      if (phone.isEmpty || digits.length < 9) {
+        _notify('Inserisci un numero di cellulare valido.');
+        return;
+      }
+    }
     setState(() => _loading = true);
     try {
       if (_isRegister) {
         await AuthService.registerWithEmail(
-            _emailCtrl.text.trim(), _passwordCtrl.text, _nameCtrl.text.trim());
+            _emailCtrl.text.trim(), _passwordCtrl.text,
+            _nameCtrl.text.trim(), _phoneCtrl.text.trim());
       } else {
         await AuthService.signInWithEmail(
             _emailCtrl.text.trim(), _passwordCtrl.text);
@@ -136,6 +147,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: inputStyle,
                   decoration:
                       const InputDecoration(hintText: 'Nome e Cognome'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _phoneCtrl,
+                  style: inputStyle,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    hintText: 'Numero di cellulare *',
+                    prefixText: '+39 ',
+                  ),
                 ),
                 const SizedBox(height: 12),
               ],
