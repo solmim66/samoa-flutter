@@ -33,7 +33,7 @@ class EmailService {
         'event_date': eventDate,
         'option':     optionLabel,
         'guests':     guests.toString(),
-        'total':      '€. $total',
+        'total':      'euro $total',
         'notes':      notes.isEmpty ? 'Nessuna' : notes,
       },
     });
