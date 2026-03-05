@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class EmailService {
   // ── Configura questi valori dopo aver creato l'account EmailJS ────────────
   static const _serviceId  = 'service_0782ncn';
-  static const _templateId = 'template_0sgawk9';
+  static const _templateId = 'template_xeqbfgt';
   static const _publicKey  = 'ayYRb1YrRS4Moq2zJ';
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -35,6 +35,29 @@ class EmailService {
         'guests':     guests.toString(),
         'total':      'euro $total',
         'notes':      notes.isEmpty ? 'Nessuna' : notes,
+      },
+    });
+
+    await http.post(
+      Uri.parse('https://api.emailjs.com/api/v1.0/email/send'),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+  }
+
+  static const _welcomeTemplateId = 'template_welcome01';
+
+  static Future<void> sendWelcome({
+    required String toName,
+    required String toEmail,
+  }) async {
+    final body = jsonEncode({
+      'service_id':  _serviceId,
+      'template_id': _welcomeTemplateId,
+      'user_id':     _publicKey,
+      'template_params': {
+        'to_name':  toName,
+        'to_email': toEmail,
       },
     });
 

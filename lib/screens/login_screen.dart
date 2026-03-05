@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import '../services/email_service.dart';
 import '../theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -71,6 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
         await AuthService.registerWithEmail(
             _emailCtrl.text.trim(), _passwordCtrl.text,
             _nameCtrl.text.trim(), _phoneCtrl.text.trim());
+        EmailService.sendWelcome(
+          toName:  _nameCtrl.text.trim(),
+          toEmail: _emailCtrl.text.trim(),
+        ).catchError((_) {});
       } else {
         await AuthService.signInWithEmail(
             _emailCtrl.text.trim(), _passwordCtrl.text);
