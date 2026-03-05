@@ -50,6 +50,10 @@ class AuthService {
     return _auth.signInWithCredential(credential);
   }
 
+  static Future<void> sendPasswordReset(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
   static Future<void> signOut() async {
     if (!kIsWeb) await _googleSignIn.signOut();
     await _auth.signOut();

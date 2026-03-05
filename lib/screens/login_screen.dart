@@ -48,6 +48,94 @@ class _LoginScreenState extends State<LoginScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
+  Future<void> _handleForgotPassword() async {
+    final emailCtrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: const Color(0xFF0E0A14),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: kCardBorder)),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Password dimenticata',
+                  style: GoogleFonts.abrilFatface(
+                      fontSize: 22, color: Colors.white)),
+              const SizedBox(height: 12),
+              Text(
+                'Inserisci la tua email. Ti invieremo un link per reimpostare la password.',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, color: Colors.white70, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                style: GoogleFonts.montserrat(
+                    fontSize: 15, color: Colors.black87, fontWeight: FontWeight.w700),
+                decoration: const InputDecoration(hintText: 'La tua email'),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(null),
+                    child: Text('Annulla',
+                        style: GoogleFonts.montserrat(
+                            color: Colors.white54, fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(emailCtrl.text.trim()),
+                    child: Text('Invia',
+                        style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (result == null || result.isEmpty) return;
+    try {
+      await AuthService.sendPasswordReset(result);
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFF0E0A14),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: kCardBorder)),
+          title: Text('Email inviata',
+              style: GoogleFonts.abrilFatface(color: Colors.white, fontSize: 20)),
+          content: Text(
+            'Se l\'indirizzo è registrato riceverai un\'email con il link per reimpostare la password.',
+            style: GoogleFonts.montserrat(color: Colors.white70, fontSize: 14),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Ok', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      _notify(AuthService.localizeError(e.code));
+    } catch (_) {
+      _notify('Errore nell\'invio dell\'email.');
+    }
+  }
+
   Future<void> _handleSubmit() async {
     if (_emailCtrl.text.isEmpty || _passwordCtrl.text.isEmpty) return;
     if (_isRegister) {
@@ -186,6 +274,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(hintText: 'Password'),
                 onSubmitted: (_) => _handleSubmit(),
               ),
+              if (!_isRegister) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _handleForgotPassword,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text('Password dimenticata?',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 13,
+                            color: Colors.white60,
+                            fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
 
               // ── Messaggio di errore inline ────────────────────────────────
@@ -248,6 +355,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text(
                     _isRegister ? 'Hai già un account? Accedi' : 'Non hai un account? Registrati',
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.montserrat(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
