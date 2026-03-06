@@ -1,11 +1,11 @@
 {
-    "name": "samoa_flutter",
-    "short_name": "samoa_flutter",
+    "name": "Samoa Village",
+    "short_name": "Samoa Village",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0a1628",
+    "theme_color": "#0a1628",
+    "description": "Samoa Village – Benessere e prenotazioni",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

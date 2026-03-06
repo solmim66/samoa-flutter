@@ -1,46 +1,137 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Samoa Village – Benessere e prenotazioni">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="samoa_flutter">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Samoa Village">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#0a1628">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>samoa_flutter</title>
+  <title>Samoa Village</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    #pwa-install-banner {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background-color: #0a1628;
+      color: #ffffff;
+      padding: 16px 20px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.4);
+      font-family: sans-serif;
+    }
+    #pwa-install-banner.visible {
+      display: flex;
+    }
+    #pwa-install-banner .banner-text {
+      flex: 1;
+    }
+    #pwa-install-banner .banner-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #ffffff;
+    }
+    #pwa-install-banner .banner-sub {
+      font-size: 12px;
+      color: #a0b4cc;
+      margin-top: 2px;
+    }
+    #pwa-install-banner .banner-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    #pwa-install-btn {
+      background-color: #ffffff;
+      color: #0a1628;
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #pwa-dismiss-btn {
+      background: none;
+      border: none;
+      color: #a0b4cc;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner">
+    <div class="banner-text">
+      <div class="banner-title">Installa Samoa Village</div>
+      <div class="banner-sub">Aggiungila alla schermata home per accedervi offline</div>
+    </div>
+    <div class="banner-actions">
+      <button id="pwa-install-btn">Installa</button>
+      <button id="pwa-dismiss-btn" aria-label="Chiudi">&#x2715;</button>
+    </div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    let deferredPrompt = null;
+    const banner = document.getElementById('pwa-install-banner');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!sessionStorage.getItem('pwa-dismissed')) {
+        banner.classList.add('visible');
+      }
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      banner.classList.remove('visible');
+    });
+
+    dismissBtn.addEventListener('click', () => {
+      banner.classList.remove('visible');
+      sessionStorage.setItem('pwa-dismissed', '1');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      banner.classList.remove('visible');
+      deferredPrompt = null;
+    });
+  </script>
 </body>
 </html>
