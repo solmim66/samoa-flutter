@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.4-stable.tar.xz -o /tmp/flutter.tar.xz
+tar xf /tmp/flutter.tar.xz -C /tmp
+export PATH="$PATH:/tmp/flutter/bin"
+flutter pub get
+flutter build web --release --base-href /
