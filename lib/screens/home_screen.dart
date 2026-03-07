@@ -13,9 +13,7 @@ import 'client_bookings_screen.dart';
 import 'login_screen.dart';
 import 'manager_bookings_screen.dart';
 import 'price_settings_screen.dart';
-import 'users_management_screen.dart';
-
-enum _Tab { events, bookings, myBookings, users }
+enum _Tab { events, bookings, myBookings }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -177,8 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           _showAddEvent();
                         case 'prezzi':
                           _showPriceSettings();
-                        case 'utenti':
-                          setState(() => _tab = _Tab.users);
                         case 'esci':
                           AuthService.signOut();
                       }
@@ -211,12 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         PopupMenuItem(
                           value: 'prezzi',
                           child: Text('⚙  Impostazioni Prezzi',
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 13, color: Colors.white)),
-                        ),
-                        PopupMenuItem(
-                          value: 'utenti',
-                          child: Text('👥  Gestione Utenti',
                               style: GoogleFonts.montserrat(
                                   fontSize: 13, color: Colors.white)),
                         ),
@@ -325,9 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // ── Contenuto principale ──────────────────────────────────────────
           SliverToBoxAdapter(
-            child: _tab == _Tab.users && auth.isManager
-                ? const UsersManagementScreen()
-                : _tab == _Tab.bookings && auth.isManager
+            child: _tab == _Tab.bookings && auth.isManager
                 ? StreamBuilder<List<EventModel>>(
                     stream: EventService.eventsStream(),
                     builder: (context, snap) => ManagerBookingsScreen(
