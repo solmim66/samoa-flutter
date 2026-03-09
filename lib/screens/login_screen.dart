@@ -146,11 +146,15 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       setState(() => _loading = true);
-      final phoneExists = await AuthService.isPhoneAlreadyRegistered(phone);
-      if (phoneExists) {
-        if (mounted) setState(() => _loading = false);
-        _notify('Numero di cellulare già registrato.');
-        return;
+      try {
+        final phoneExists = await AuthService.isPhoneAlreadyRegistered(phone);
+        if (phoneExists) {
+          if (mounted) setState(() => _loading = false);
+          _notify('Numero di cellulare già registrato.');
+          return;
+        }
+      } catch (_) {
+        // se la query fallisce per permessi, si procede con la registrazione
       }
     } else {
       setState(() => _loading = true);

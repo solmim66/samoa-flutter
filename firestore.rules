@@ -2,11 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Utenti: ognuno legge/scrive solo il proprio, il gestore legge tutti
+    // Utenti: lettura pubblica (serve per controllo telefono in registrazione)
+    // scrittura solo al proprietario o al gestore
     match /users/{uid} {
-      allow read: if request.auth != null &&
-                     (request.auth.uid == uid ||
-                      request.auth.token.email == 'manager@saladanza.it');
+      allow read: if true;
       allow write: if request.auth != null &&
                       (request.auth.uid == uid ||
                        request.auth.token.email == 'manager@saladanza.it');
